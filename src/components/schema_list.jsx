@@ -30,6 +30,7 @@ const SchemaList = () => {
         pt: "20px",
         display: "flex",
         flexDirection: "column",
+        justifyContent: "space-between",
         alignItems: "center", // Optional: If you also want to center vertically
       }}
     >
@@ -37,29 +38,34 @@ const SchemaList = () => {
         <>loading</>
       ) : (
         <>
-          <Typography
-            component="div"
-            variant="subtitle1"
-            sx={{
-              mb: "20px",
-            }}
-          >
-            Xml_schemas{" "}
-          </Typography>
-
           {fileReducer?.fileSchemas?.length >= 0 ? (
             fileReducer.fileSchemas?.map((schema) => (
               <Button
-                size="medium"
+                size="large"
                 key={schema._id}
-                variant="contained"
-                startIcon={<FolderIcon sx={{ color: "white" }} />}
-                sx={{ mb: 2 }}
+                variant="outlined"
+                sx={{
+                  margin: 1,
+                  mb: 2,
+                  borderRadius: 2,
+                  paddingTop: 2,
+                  pb: 2,
+                  width: "100%", // Set the buttons' width to 100%
+                  textAlign: "left",
+                  borderColor: "#7085F4",
+                  backgroundColor: "#F5F9FF",
+                }}
               >
-                {schema.title}{" "}
-                <span
-                  style={{ fontSize: 11, color: "white", paddingLeft: 5 }}
-                >{`V:${schema.version}`}</span>
+                <Typography
+                  sx={{
+                    fontSize: 16,
+                    color: "#1E1E1E",
+                    // fontFamily: "poppins",
+                    fontWeight: "normal",
+                  }}
+                >
+                  {schema.title} {`  V:${schema.version}`}
+                </Typography>
               </Button>
             ))
           ) : (
@@ -67,8 +73,46 @@ const SchemaList = () => {
               <h2>no data yet </h2>
             </div>
           )}
-          <Box sx={{ padding: "10px" }}>
-            <ListItem
+        </>
+      )}
+
+      <Box
+        sx={{
+          width: "100%",
+          alignItems: "center",
+
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Button
+          size="large"
+          // key={schema._id}
+          variant="outlined"
+          sx={{
+            margin: 1,
+            mb: 2,
+            borderRadius: 2,
+            paddingTop: 2,
+            pb: 2,
+            width: "100%", // Set the buttons' width to 100%
+            textAlign: "left",
+            borderColor: "#7085F4",
+            backgroundColor: "#7085F4",
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: 16,
+              color: "#1E1E1E",
+
+              fontWeight: "normal",
+            }}
+          >
+            {"New Schema"}
+          </Typography>
+        </Button>
+        {/* <ListItem
               sx={{
                 backgroundColor: "#9c27b0",
                 borderRadius: "10px",
@@ -86,10 +130,8 @@ const SchemaList = () => {
                 }}
                 primary="new schema"
               />
-            </ListItem>
-          </Box>
-        </>
-      )}
+            </ListItem> */}
+      </Box>
     </Box>
   );
 };

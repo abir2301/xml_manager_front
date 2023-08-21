@@ -28,6 +28,8 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import StarBorder from "@mui/icons-material/StarBorder";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FnInstance from "../utulies/functions";
 import { dataStatic } from "../utulies/data";
@@ -108,7 +110,13 @@ const StyledTreeItem = styled((props) => (
 const TreeItemComponent = (prop) => {
   const length = prop.item.childrens.length;
   return (
-    <Box>
+    <Box
+      sx={{
+        borderColor: "#0024DF",
+        borderWidth: 5,
+        backgroundColor: "#7085F4",
+      }}
+    >
       <Typography variant="h7">
         name : {prop.item.name} {}{" "}
       </Typography>
@@ -193,8 +201,37 @@ const ListItemComponent = ({ item, index }) => {
     setNewNodeType("");
   };
   return (
-    <>
-      <ListItemButton disableRipple>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        width: "100%",
+      }}
+    >
+      <Box
+        sx={{
+          borderRadius: 180,
+          height: 15,
+          width: 15,
+          backgroundColor: "#E55707",
+          //position: "fixed",
+        }}
+      ></Box>
+      <ListItemButton
+        disableRipple
+        sx={{
+          width: "100%",
+          //  paddingX: 5,
+          // justifyContent: "flex-start",
+          alignItems: "center",
+          backgroundColor: "#F5F9FF",
+          borderColor: "#877C7C",
+          borderRadius: 2,
+          borderWidth: 1,
+        }}
+      >
         {item.childrens.length >= 1 ? (
           <ListItemIcon onClick={handleClick}>
             {open ? <ExpandLess /> : <ExpandMore />}
@@ -206,69 +243,113 @@ const ListItemComponent = ({ item, index }) => {
         {item.is_attribute ? (
           ""
         ) : (
-          <AddCircleOutlineIcon onClick={handleAddClick} />
+          <AddCircleOutlineIcon
+            sx={{ color: "#877C7C", fontSize: 25 }}
+            onClick={handleAddClick}
+          />
         )}
+        <DeleteForeverIcon
+          sx={{ color: "#877C7C", fontSize: 25 }}
+          onClick={handleAddClick}
+        />
+        <EditIcon
+          sx={{ color: "#877C7C", fontSize: 25 }}
+          onClick={handleAddClick}
+        />
       </ListItemButton>
+      {/* <Box
+        sx={{
+          alignSelf: "center",
+          height: 15,
+          width: 15,
+          borderRadius: 180,
+          backgroundColor: "#7085F4",
+        }}
+      ></Box> */}
       {showAddForm && (
-        <Box
-          sx={{
-            flexDirection: "row",
-            margin: "10px",
-            display: "flex",
-            rowGap: "20px",
-            columnGap: "20px",
-          }}
-        >
-          <input
-            type="text"
-            height={"20px"}
-            placeholder="Node Name"
-            value={newNodeName}
-            onChange={(e) => setNewNodeName(e.target.value)}
-          />
-          <input
-            type="text"
-            height={"20px"}
-            placeholder="Node Type"
-            value={newNodeType}
-            onChange={(e) => setNewNodeType(e.target.value)}
-          />
-          <FormControl variant="filled" sx={{ minWidth: 120 }}>
-            <InputLabel id="demo-simple-select-standard-label">
-              is_attribute
-            </InputLabel>
-            <Select
-              sx={{ color: "black" }}
-              id="demo-simple-select-standard"
-              value={isAtribbute}
-              onChange={(e) => {
-                setIsAtribbute(e.target.value);
-              }}
-            >
-              <MenuItem value={true}>true</MenuItem>
-              <MenuItem value={false}>false</MenuItem>
-            </Select>
-          </FormControl>
-          <button onClick={handleAddNode}>Add Node</button>
-          <button onClick={handleDeleteClick}>
-            <DeleteIcon></DeleteIcon>
-          </button>
+        <Box sx={{}}>
+          <Box
+            sx={{
+              flexDirection: "row",
+              margin: "10px",
+              display: "flex",
+              rowGap: "20px",
+              columnGap: "20px",
+            }}
+          >
+            <input
+              type="text"
+              height={"20px"}
+              placeholder="Node Name"
+              value={newNodeName}
+              onChange={(e) => setNewNodeName(e.target.value)}
+            />
+            <input
+              type="text"
+              height={"20px"}
+              placeholder="Node Type"
+              value={newNodeType}
+              onChange={(e) => setNewNodeType(e.target.value)}
+            />
+            <FormControl variant="filled" sx={{ minWidth: 120 }}>
+              <InputLabel id="demo-simple-select-standard-label">
+                is_attribute
+              </InputLabel>
+              <Select
+                sx={{ color: "black" }}
+                id="demo-simple-select-standard"
+                value={isAtribbute}
+                onChange={(e) => {
+                  setIsAtribbute(e.target.value);
+                }}
+              >
+                <MenuItem value={true}>true</MenuItem>
+                <MenuItem value={false}>false</MenuItem>
+              </Select>
+            </FormControl>
+            <button onClick={handleAddNode}>Add Node</button>
+            <button onClick={handleDeleteClick}>
+              <DeleteIcon></DeleteIcon>
+            </button>
+          </Box>
         </Box>
       )}
-      <Collapse in={openIndexes.includes(index)} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-          {item.childrens.map((nestedItem, nestedIndex) => (
-            <Box sx={{ margin: "20px" }}>
-              <ListItemComponent
-                key={nestedItem._id}
-                item={nestedItem}
-                index={nestedIndex}
-              />
-            </Box>
-          ))}
-        </List>
+      <Collapse
+        in={openIndexes.includes(index)}
+        timeout="auto"
+        unmountOnExit
+        sx={{
+          flexDirection: "row",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flex: 1,
+        }}
+      >
+        {/* <Box
+          sx={{
+            borderWidth: 5,
+            width: 10,
+            height: "100%",
+            borderColor: "#7B61FF",
+            backgroundColor: "black",
+          }}
+        ></Box> */}
+        <Box>
+          <List component="div" disablePadding>
+            {item.childrens.map((nestedItem, nestedIndex) => (
+              <Box sx={{ margin: "20px" }}>
+                <ListItemComponent
+                  key={nestedItem._id}
+                  item={nestedItem}
+                  index={nestedIndex}
+                />
+              </Box>
+            ))}
+          </List>
+        </Box>
       </Collapse>
-    </>
+    </Box>
   );
 };
 
@@ -300,7 +381,9 @@ export default function SchemasTreeView() {
           in={openIndexes.includes(0)}
           timeout="auto"
           unmountOnExit
-          sx={{ marginLeft: "20px" }}
+          sx={{
+            marginLeft: "20px",
+          }}
         >
           <List component="div" disablePadding>
             {dataStatic.map((item, index) => (

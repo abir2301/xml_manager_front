@@ -9,13 +9,15 @@ import {
   ListItemText,
   Button,
 } from "@mui/material";
+import "../styles/styles.css";
+import Colors from "../utulies/colors";
 import { useState, useEffect } from "react";
 import FolderIcon from "@mui/icons-material/Folder";
 import AddIcon from "@mui/icons-material/Add";
 import { getFilesSchema } from "../features/schemas/slice";
 import { useDispatch, useSelector } from "react-redux";
 
-const SchemaList = () => {
+const SchemaList = ({ onChange }) => {
   const dispatch = useDispatch();
 
   const fileReducer = useSelector((state) => state.file); // Get schemaList from the store
@@ -31,7 +33,7 @@ const SchemaList = () => {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        alignItems: "center", // Optional: If you also want to center vertically
+        alignItems: "center",
       }}
     >
       {fileReducer.loading ? (
@@ -41,6 +43,8 @@ const SchemaList = () => {
           {fileReducer?.fileSchemas?.length >= 0 ? (
             fileReducer.fileSchemas?.map((schema) => (
               <Button
+                className="schemaButton"
+                onClick={() => onChange(schema)}
                 size="large"
                 key={schema._id}
                 variant="outlined"
@@ -50,22 +54,25 @@ const SchemaList = () => {
                   borderRadius: 2,
                   paddingTop: 2,
                   pb: 2,
+                  gap: 2,
                   width: "100%", // Set the buttons' width to 100%
                   textAlign: "left",
-                  borderColor: "#7085F4",
-                  backgroundColor: "#F5F9FF",
+                  borderColor: Colors.purple,
+                  backgroundColor: Colors.bg,
+                  // flexDirection: "column",
                 }}
               >
                 <Typography
                   sx={{
                     fontSize: 16,
                     color: "#1E1E1E",
-                    // fontFamily: "poppins",
                     fontWeight: "normal",
                   }}
                 >
-                  {schema.title} {`  V:${schema.version}`}
+                  {schema.title}
                 </Typography>
+
+                <span> V :{schema.version}</span>
               </Button>
             ))
           ) : (
@@ -87,7 +94,6 @@ const SchemaList = () => {
       >
         <Button
           size="large"
-          // key={schema._id}
           variant="outlined"
           sx={{
             margin: 1,
@@ -97,8 +103,8 @@ const SchemaList = () => {
             pb: 2,
             width: "100%", // Set the buttons' width to 100%
             textAlign: "left",
-            borderColor: "#7085F4",
-            backgroundColor: "#7085F4",
+            borderColor: Colors.purple,
+            backgroundColor: Colors.purple,
           }}
         >
           <Typography
@@ -112,25 +118,6 @@ const SchemaList = () => {
             {"New Schema"}
           </Typography>
         </Button>
-        {/* <ListItem
-              sx={{
-                backgroundColor: "#9c27b0",
-                borderRadius: "10px",
-              }}
-            >
-              <ListItemIcon>
-                <AddIcon />
-              </ListItemIcon>
-              <ListItemText
-                primaryTypographyProps={{
-                  variant: "body1", // Set the desired variant
-                  sx: {
-                    fontSize: "15px", // Set the desired font size
-                  },
-                }}
-                primary="new schema"
-              />
-            </ListItem> */}
       </Box>
     </Box>
   );

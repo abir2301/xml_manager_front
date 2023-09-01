@@ -11,6 +11,8 @@ import {
   MenuItem,
   Select,
   FormControl,
+  TextField,
+  colors,
 } from "@mui/material";
 import TreeItem, { treeItemClasses } from "@mui/lab/TreeItem";
 import Collapse from "@mui/material/Collapse";
@@ -28,43 +30,12 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import StarBorder from "@mui/icons-material/StarBorder";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FnInstance from "../utulies/functions";
 import { dataStatic } from "../utulies/data";
-
-function MinusSquare(props) {
-  return (
-    <SvgIcon fontSize="inherit" style={{ width: 14, height: 14 }} {...props}>
-      {/* tslint:disable-next-line: max-line-length */}
-      <path d="M22.047 22.074v0 0-20.147 0h-20.12v0 20.147 0h20.12zM22.047 24h-20.12q-.803 0-1.365-.562t-.562-1.365v-20.147q0-.776.562-1.351t1.365-.575h20.147q.776 0 1.351.575t.575 1.351v20.147q0 .803-.575 1.365t-1.378.562v0zM17.873 11.023h-11.826q-.375 0-.669.281t-.294.682v0q0 .401.294 .682t.669.281h11.826q.375 0 .669-.281t.294-.682v0q0-.401-.294-.682t-.669-.281z" />
-    </SvgIcon>
-  );
-}
-
-function PlusSquare(props) {
-  return (
-    <SvgIcon fontSize="inherit" style={{ width: 14, height: 14 }} {...props}>
-      {/* tslint:disable-next-line: max-line-length */}
-      <path d="M22.047 22.074v0 0-20.147 0h-20.12v0 20.147 0h20.12zM22.047 24h-20.12q-.803 0-1.365-.562t-.562-1.365v-20.147q0-.776.562-1.351t1.365-.575h20.147q.776 0 1.351.575t.575 1.351v20.147q0 .803-.575 1.365t-1.378.562v0zM17.873 12.977h-4.923v4.896q0 .401-.281.682t-.682.281v0q-.375 0-.669-.281t-.294-.682v-4.896h-4.923q-.401 0-.682-.294t-.281-.669v0q0-.401.281-.682t.682-.281h4.923v-4.896q0-.401.294-.682t.669-.281v0q.401 0 .682.281t.281.682v4.896h4.923q.401 0 .682.281t.281.682v0q0 .375-.281.669t-.682.294z" />
-    </SvgIcon>
-  );
-}
-
-function CloseSquare(props) {
-  return (
-    <SvgIcon
-      className="close"
-      fontSize="inherit"
-      style={{ width: 14, height: 14 }}
-      {...props}
-    >
-      {/* tslint:disable-next-line: max-line-length */}
-      <path d="M17.485 17.512q-.281.281-.682.281t-.696-.268l-4.12-4.147-4.12 4.147q-.294.268-.696.268t-.682-.281-.281-.682.294-.669l4.12-4.147-4.12-4.147q-.294-.268-.294-.669t.281-.682.682-.281.696 .268l4.12 4.147 4.12-4.147q.294-.268.696-.268t.682.281 .281.669-.294.682l-4.12 4.147 4.12 4.147q.294.268 .294.669t-.281.682zM22.047 22.074v0 0-20.147 0h-20.12v0 20.147 0h20.12zM22.047 24h-20.12q-.803 0-1.365-.562t-.562-1.365v-20.147q0-.776.562-1.351t1.365-.575h20.147q.776 0 1.351.575t.575 1.351v20.147q0 .803-.575 1.365t-1.378.562v0z" />
-    </SvgIcon>
-  );
-}
 
 function TransitionComponent(props) {
   const style = useSpring({
@@ -108,7 +79,7 @@ const StyledTreeItem = styled((props) => (
 }));
 
 const TreeItemComponent = (prop) => {
-  const length = prop.item.childrens.length;
+  const length = prop.item.childrens?.length;
   return (
     <Box
       sx={{
@@ -130,7 +101,7 @@ const TreeItemComponent = (prop) => {
 };
 const RecursiveTreeItem = ({ item }) => (
   <StyledTreeItem nodeId={item._id} label=<TreeItemComponent item={item} />>
-    {item.childrens.map((child) => (
+    {item.childrens?.map((child) => (
       <RecursiveTreeItem key={child._id} item={child} />
     ))}
   </StyledTreeItem>
@@ -138,7 +109,9 @@ const RecursiveTreeItem = ({ item }) => (
 
 const ListItemComponent = ({ item, index }) => {
   const [openIndexes, setOpenIndexes] = React.useState([]);
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
+  const [openStates, setOpenStates] = React.useState({});
+
   const [data, setData] = React.useState(dataStatic);
   const [showAddForm, setShowAddForm] = React.useState(false); // State to show/hide the add form
   const [newNodeName, setNewNodeName] = React.useState(""); // State to manage the new node name
@@ -164,6 +137,8 @@ const ListItemComponent = ({ item, index }) => {
     setNewNodeType("");
     setIsAtribbute(false);
   };
+  // const length = item.childrens.length;
+
   const addNodeToParent = (parentId, newNodeName, newNodeType, isAttribute) => {
     setData((prevData) => {
       const newData = [...prevData];
@@ -201,117 +176,175 @@ const ListItemComponent = ({ item, index }) => {
     setNewNodeType("");
   };
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        width: "100%",
-      }}
-    >
+    <Box>
       <Box
         sx={{
-          borderRadius: 180,
-          height: 15,
-          width: 15,
-          backgroundColor: "#E55707",
-          //position: "fixed",
-        }}
-      ></Box>
-      <ListItemButton
-        disableRipple
-        sx={{
-          width: "100%",
-          //  paddingX: 5,
-          // justifyContent: "flex-start",
-          alignItems: "center",
+          flexDirection: "row",
+          // bgcolor: "pink",
           backgroundColor: "#F5F9FF",
-          borderColor: "#877C7C",
-          borderRadius: 2,
-          borderWidth: 1,
+          border: "2px solid #E4E7EC",
+
+          height: "minHeight",
+          display: "flex",
+          gap: 2,
+          //  flex: 1,
+          justifyContent: "space-around",
+          alignItems: "center",
+          // padding: 3,
+          // border: "1px dashed #0024df",
+          borderRadius: 4,
         }}
       >
-        {item.childrens.length >= 1 ? (
-          <ListItemIcon onClick={handleClick}>
-            {open ? <ExpandLess /> : <ExpandMore />}
-          </ListItemIcon>
-        ) : (
-          ""
-        )}
-        <ListItemText primary={item.name} onClick={handleClick} />
-        {item.is_attribute ? (
-          ""
-        ) : (
-          <AddCircleOutlineIcon
-            sx={{ color: "#877C7C", fontSize: 25 }}
-            onClick={handleAddClick}
-          />
-        )}
-        <DeleteForeverIcon
-          sx={{ color: "#877C7C", fontSize: 25 }}
-          onClick={handleAddClick}
-        />
-        <EditIcon
-          sx={{ color: "#877C7C", fontSize: 25 }}
-          onClick={handleAddClick}
-        />
-      </ListItemButton>
-      {/* <Box
-        sx={{
-          alignSelf: "center",
-          height: 15,
-          width: 15,
-          borderRadius: 180,
-          backgroundColor: "#7085F4",
-        }}
-      ></Box> */}
-      {showAddForm && (
-        <Box sx={{}}>
+        <Box
+          sx={{
+            borderWidth: 5,
+            borderColor: "black",
+            padding: 1,
+            flex: "auto",
+            display: "flex",
+            // backgroundColor: "red",
+
+            justifyContent: "flex-start",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <Box
             sx={{
-              flexDirection: "row",
-              margin: "10px",
-              display: "flex",
-              rowGap: "20px",
-              columnGap: "20px",
+              backgroundColor: "#F5F9FF",
+              borderRadius: 4,
+              width: "100%",
             }}
           >
-            <input
-              type="text"
-              height={"20px"}
-              placeholder="Node Name"
-              value={newNodeName}
-              onChange={(e) => setNewNodeName(e.target.value)}
-            />
-            <input
-              type="text"
-              height={"20px"}
-              placeholder="Node Type"
-              value={newNodeType}
-              onChange={(e) => setNewNodeType(e.target.value)}
-            />
-            <FormControl variant="filled" sx={{ minWidth: 120 }}>
-              <InputLabel id="demo-simple-select-standard-label">
-                is_attribute
-              </InputLabel>
-              <Select
-                sx={{ color: "black" }}
-                id="demo-simple-select-standard"
-                value={isAtribbute}
-                onChange={(e) => {
-                  setIsAtribbute(e.target.value);
+            <ListItemButton
+              disableRipple
+              sx={{
+                width: "100%",
+                alignItems: "center",
+              }}
+            >
+              {console.log("childrens length:", item.childrens?.length)}
+
+              {item.childrens?.length >= 1 ? (
+                <ListItemIcon onClick={handleClick}>
+                  {openIndexes[item._id] ? <ExpandLess /> : <ExpandMore />}
+                </ListItemIcon>
+              ) : (
+                ""
+              )}
+
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
                 }}
               >
-                <MenuItem value={true}>true</MenuItem>
-                <MenuItem value={false}>false</MenuItem>
-              </Select>
-            </FormControl>
-            <button onClick={handleAddNode}>Add Node</button>
-            <button onClick={handleDeleteClick}>
-              <DeleteIcon></DeleteIcon>
-            </button>
+                <ListItemText
+                  sx={{ marginRight: 3 }}
+                  secondary={"name : "}
+                  onClick={handleClick}
+                />
+                <ListItemText
+                  sx={{}}
+                  primary={item.name}
+                  onClick={handleClick}
+                />
+                {item.childrens?.length >= 1 ? (
+                  <></>
+                ) : (
+                  <>
+                    <ListItemText
+                      sx={{
+                        marginLeft: 3,
+                        marginRight: 3,
+                      }}
+                      secondary={"type : "}
+                    />
+                    <ListItemText primary={item.type} />
+                  </>
+                )}
+              </Box>
+            </ListItemButton>
           </Box>
+          {/* end expand button container */}
+        </Box>
+        <Box
+          sx={{
+            borderColor: "black",
+            // bgcolor: "yellow",
+            flexDirection: "row",
+            gap: 1,
+            display: "flex",
+            alignItems: "center",
+            padding: 1,
+            //  flex: 1,
+          }}
+        >
+          {item.is_attribute ? (
+            ""
+          ) : (
+            <AddIcon
+              sx={{ color: "#877C7C", fontSize: 28 }}
+              onClick={handleAddClick}
+            />
+          )}
+          <EditIcon
+            sx={{ color: "green", fontSize: 28, paddingX: 1, marginY: 2 }}
+            // onClick={handleAddClick}
+          />
+          <DeleteForeverIcon
+            sx={{ color: "tomato", fontSize: 28, paddingX: 1, marginY: 2 }}
+            // onClick={handleAddClick}
+          />
+        </Box>
+      </Box>
+      {showAddForm && (
+        <Box
+          sx={{
+            flexDirection: "row",
+            margin: "10px",
+            display: "flex",
+            rowGap: "20px",
+            columnGap: "20px",
+          }}
+        >
+          <TextField
+            sx={{}}
+            variant="outlined"
+            type="text"
+            height={"20px"}
+            placeholder="Node_name"
+            value={newNodeName}
+            onChange={(e) => setNewNodeName(e.target.value)}
+          />
+          <TextField
+            type="text"
+            height={"20px"}
+            placeholder="Node Type"
+            value={newNodeType}
+            onChange={(e) => setNewNodeType(e.target.value)}
+          />
+          <FormControl variant="filled" sx={{ minWidth: 120 }}>
+            <InputLabel id="demo-simple-select-standard-label">
+              is_attribute
+            </InputLabel>
+            <Select
+              sx={{ color: "black" }}
+              id="demo-simple-select-standard"
+              value={isAtribbute}
+              onChange={(e) => {
+                setIsAtribbute(e.target.value);
+              }}
+            >
+              <MenuItem value={true}>true</MenuItem>
+              <MenuItem value={false}>false</MenuItem>
+            </Select>
+          </FormControl>
+          <button onClick={handleAddNode}>Add Node</button>
+          <button onClick={handleDeleteClick}>
+            <DeleteIcon></DeleteIcon>
+          </button>
         </Box>
       )}
       <Collapse
@@ -321,61 +354,61 @@ const ListItemComponent = ({ item, index }) => {
         sx={{
           flexDirection: "row",
           display: "flex",
-          alignItems: "center",
+          width: "100%",
+          alignItems: "flex-start",
           justifyContent: "space-between",
-          flex: 1,
+          // flex: 1,
         }}
       >
-        {/* <Box
-          sx={{
-            borderWidth: 5,
-            width: 10,
-            height: "100%",
-            borderColor: "#7B61FF",
-            backgroundColor: "black",
-          }}
-        ></Box> */}
-        <Box>
-          <List component="div" disablePadding>
-            {item.childrens.map((nestedItem, nestedIndex) => (
-              <Box sx={{ margin: "20px" }}>
+        <List component="div" disablePadding>
+          {item.childrens
+            ?.filter((nestedItem) => nestedItem !== null)
+            .map((nestedItem, nestedIndex) => (
+              <Box key={nestedItem._id} sx={{ margin: "12px 0 0 20px" }}>
                 <ListItemComponent
                   key={nestedItem._id}
                   item={nestedItem}
                   index={nestedIndex}
+                  open={openStates[nestedItem._id]}
                 />
               </Box>
             ))}
-          </List>
-        </Box>
+          {/* {item.attribute !== null ? (
+            <Box sx={{ margin: "12px 0 0 20px", colors: "red" }}>
+              <ListItemComponent
+                key={item.attribute?._id}
+                item={item.attribute}
+                index={item.childrens?.length}
+              />
+            </Box>
+          ) : (
+            <></>
+          )} */}
+        </List>
       </Collapse>
     </Box>
   );
 };
 
-export default function SchemasTreeView() {
+export default function SchemasTreeView({ schema }) {
   const [open, setOpen] = React.useState(true);
   const [openIndexes, setOpenIndexes] = React.useState([0]);
-
-  const handleClick = () => {
-    if (openIndexes.includes(0)) {
-      setOpenIndexes(openIndexes.filter((i) => i !== 0));
-    } else {
-      setOpenIndexes([...openIndexes, 0]);
-    }
-  };
+  const [data, setData] = React.useState([]);
+  React.useEffect(() => {
+    setData(schema);
+  }, [schema]);
 
   return (
     <>
       <List
-        sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
+        sx={{ bgcolor: "background.paper" }}
         component="nav"
         aria-labelledby="nested-list-subheader"
-        subheader={
-          <ListSubheader component="div" id="nested-list-subheader">
-            Nested List Items
-          </ListSubheader>
-        }
+        // subheader={
+        //   <ListSubheader component="div" id="nested-list-subheader">
+        //     Nested List Items
+        //   </ListSubheader>
+        // }
       >
         <Collapse
           in={openIndexes.includes(0)}
@@ -386,26 +419,33 @@ export default function SchemasTreeView() {
           }}
         >
           <List component="div" disablePadding>
-            {dataStatic.map((item, index) => (
+            {schema.map((item, index) => (
               <>
-                <ListItemComponent
-                  key={item._id}
-                  item={item}
-                  index={index}
-                ></ListItemComponent>
+                {item != null ? (
+                  <ListItemComponent
+                    key={item._id}
+                    item={item}
+                    index={index}
+                  ></ListItemComponent>
+                ) : (
+                  <Typography
+                    sx={{
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      marginTop: 5,
+                      color: "black",
+                    }}
+                    variant="h5"
+                    gutterBottom
+                  >
+                    {" "}
+                    empty Schema{" "}
+                  </Typography>
+                )}
               </>
             ))}
           </List>
         </Collapse>
-
-        {/* <ListItemButton disableRipple>
-          <ListItemIcon onClick={handleClick}>
-            {open ? <ExpandLess /> : <ExpandMore />}
-          </ListItemIcon>
-          <ListItemText primary="Main" onClick={handleClick} />
-          <AddCircleOutlineIcon onClick={() => console.log("plus clicked")} />
-        </ListItemButton> */}
-        {/*  */}
       </List>
     </>
   );

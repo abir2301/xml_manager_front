@@ -10,12 +10,19 @@ import {
   useMediaQuery,
   Box,
 } from "@mui/material";
+import Colors from "../utulies/colors";
 import SchemasTreeView from "../components/schema_tree_view";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SchemaList from "../components/schema_list";
+import { useState, useEffect } from "react";
 
 const Schemas = (props) => {
+  const [schema, setSchema] = useState([]);
+  const onChange = (data) => {
+    setSchema(data.data);
+  };
+  useEffect(() => {}, [schema]);
   return (
     <Box
       sx={{
@@ -35,7 +42,7 @@ const Schemas = (props) => {
             position: "sticky",
             padding: "10px",
             //  zIndex: theme.zIndex.drawer + 2,
-            bgcolor: "#FFFFFF",
+            bgcolor: Colors.white,
           }}
         >
           <Toolbar sx={{ justifyContent: "flex-start" }}>
@@ -43,14 +50,16 @@ const Schemas = (props) => {
               sx={{
                 marginLeft: 0,
                 fontSize: 30,
-                color: "#7085F4",
+                color: Colors.purple,
                 paddingRight: "20px",
                 paddingLeft: "20px",
               }}
             >
               Xml_Manger
             </Typography>
-            <NavigateNextIcon style={{ fontSize: "30px", color: "#7085F4" }} />
+            <NavigateNextIcon
+              style={{ fontSize: "30px", color: Colors.purple }}
+            />
           </Toolbar>
         </AppBar>
 
@@ -61,7 +70,7 @@ const Schemas = (props) => {
             height: "100%",
             width: "100%",
             position: "sticky",
-            backgroundColor: "#F5F9FF",
+            backgroundColor: Colors.bg,
             flexDirection: "row",
             flexWrap: "wrap",
           }}
@@ -70,10 +79,10 @@ const Schemas = (props) => {
             sx={{
               "&::-webkit-scrollbar": {
                 width: "5px",
-                backgroundColor: "#F5F9FF",
+                backgroundColor: Colors.bg,
               },
               "&::-webkit-scrollbar-thumb": {
-                backgroundColor: "#7085F4",
+                backgroundColor: Colors.purple,
                 borderRadius: "4px",
               },
               "&::-webkit-scrollbar-thumb:hover": {
@@ -81,24 +90,24 @@ const Schemas = (props) => {
               },
 
               height: "82vh",
-              backgroundColor: "#FFFFFF",
+              backgroundColor: Colors.white,
               padding: 2,
               borderRadius: "15px",
               overflowY: "auto",
               margin: "10px",
             }}
           >
-            <SchemaList />
+            <SchemaList onChange={onChange} />
           </Box>
 
           <Box
             sx={{
               "&::-webkit-scrollbar": {
                 width: "5px",
-                backgroundColor: "#F5F9FF", // Set scrollbar track color
+                backgroundColor: Colors.bg, // Set scrollbar track color
               },
               "&::-webkit-scrollbar-thumb": {
-                backgroundColor: "#7085F4", // Set scrollbar thumb color
+                backgroundColor: Colors.purple, // Set scrollbar thumb color
                 borderRadius: "4px", // Set thumb border radius
               },
               "&::-webkit-scrollbar-thumb:hover": {
@@ -107,16 +116,16 @@ const Schemas = (props) => {
               display: "flex",
               flex: 1,
               marginLeft: "16px",
-              backgroundColor: "#FFFFFF",
+              backgroundColor: Colors.white,
               borderRadius: "15px",
               flexDirection: "column",
               padding: "10px",
-              alignItems: "center",
+              alignItems: "flex-start",
               height: "82vh", // Set a fixed height
               overflowY: "auto", // Enable vertical scrolling when content exceeds the height
             }}
           >
-            <SchemasTreeView></SchemasTreeView>
+            <SchemasTreeView schema={schema}></SchemasTreeView>
           </Box>
         </Box>
       </Box>

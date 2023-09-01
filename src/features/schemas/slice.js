@@ -10,7 +10,7 @@ export const getFilesSchema = createAsyncThunk(
 );
 export const fileSlice = createSlice({
   name: "file",
-  initialState: { loading: false, fileSchemas: [] },
+  initialState: { loading: false, fileSchemas: [] , data :{} },
   success: false,
 
   extraReducers: {

@@ -16,7 +16,7 @@ import FolderIcon from "@mui/icons-material/Folder";
 import AddIcon from "@mui/icons-material/Add";
 import { getFilesSchema } from "../features/schemas/slice";
 import { useDispatch, useSelector } from "react-redux";
-
+import Swal from "sweetalert2";
 const SchemaList = ({ onChange }) => {
   const dispatch = useDispatch();
 
@@ -45,6 +45,77 @@ const SchemaList = ({ onChange }) => {
               <Button
                 className="schemaButton"
                 onClick={() => onChange(schema)}
+                onDoubleClick={() => {
+                  Swal.fire({
+                    title: "Manage Schema",
+                    customClass: {
+                      title: {
+                        color: Colors.purple,
+                      },
+                    },
+                    html: `
+      <input id="swal-input1" class="swal2-input" placeholder="New Schema Title" value="${schema.title}">
+    `,
+                    showCancelButton: true,
+                    confirmButtonText: "Update",
+                    cancelButtonText: "Delete",
+                    showCloseButton: true,
+                    showLoaderOnConfirm: true,
+                    preConfirm: (newTitle) => {
+                      if (
+                        Swal.getPopup().querySelector("#swal-input1").value ===
+                        ""
+                      ) {
+                        Swal.showValidationMessage("Title is required");
+                      }
+
+                      // Handle the update logic here, e.g., call an API to update the schema title
+                      return fetch("your-update-api-endpoint", {
+                        method: "POST",
+                        body: JSON.stringify({ newTitle }),
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                      })
+                        .then((response) => {
+                          if (!response.ok) {
+                            throw new Error(response.statusText);
+                          }
+                          return response.json();
+                        })
+                        .catch((error) => {
+                          Swal.showValidationMessage(
+                            `Request failed: ${error}`
+                          );
+                        });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading(),
+                  }).then((result) => {
+                    if (result.dismiss === Swal.DismissReason.cancel) {
+                      // Handle delete logic here, e.g., call an API to delete the schema
+                      fetch("your-delete-api-endpoint")
+                        .then((response) => {
+                          if (!response.ok) {
+                            throw new Error(response.statusText);
+                          }
+                          return response.json();
+                        })
+                        .then((data) => {
+                          Swal.fire({
+                            title: "Deleted",
+                            icon: "success",
+                          });
+                        })
+                        .catch((error) => {
+                          Swal.fire({
+                            title: "Error",
+                            text: `Failed to delete: ${error}`,
+                            icon: "error",
+                          });
+                        });
+                    }
+                  });
+                }}
                 size="large"
                 key={schema._id}
                 variant="outlined"

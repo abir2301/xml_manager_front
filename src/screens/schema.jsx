@@ -16,6 +16,8 @@ import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SchemaList from "../components/schema_list";
 import { useState, useEffect } from "react";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const Schemas = (props) => {
   const [schema, setSchema] = useState([]);

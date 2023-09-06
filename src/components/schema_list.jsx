@@ -9,12 +9,16 @@ import {
   ListItemText,
   Button,
 } from "@mui/material";
-import "../styles/styles.css";
+import "../styles/style.css";
 import Colors from "../utulies/colors";
 import { useState, useEffect } from "react";
 import FolderIcon from "@mui/icons-material/Folder";
 import AddIcon from "@mui/icons-material/Add";
-import { getFilesSchema } from "../features/schemas/slice";
+import {
+  getFilesSchema,
+  updateSchema,
+  deleteSchema,
+} from "../features/schemas/slice";
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 const SchemaList = ({ onChange }) => {
@@ -53,54 +57,61 @@ const SchemaList = ({ onChange }) => {
                         color: Colors.purple,
                       },
                     },
-                    html: `
-      <input id="swal-input1" class="swal2-input" placeholder="New Schema Title" value="${schema.title}">
-    `,
+                    input: "text",
+                    inputValue: schema.title,
+                    inputLabel: "Schema New Title",
+
+                    //                 html: `
+                    //   <input id="swal-input1" class="swal2-input" placeholder="New Schema Title" value="${schema.title}">
+                    // `,
                     showCancelButton: true,
                     confirmButtonText: "Update",
                     cancelButtonText: "Delete",
                     showCloseButton: true,
                     showLoaderOnConfirm: true,
                     preConfirm: (newTitle) => {
-                      if (
-                        Swal.getPopup().querySelector("#swal-input1").value ===
-                        ""
-                      ) {
-                        Swal.showValidationMessage("Title is required");
-                      }
+                      console.log(newTitle);
+                      console.log(schema._id);
 
                       // Handle the update logic here, e.g., call an API to update the schema title
-                      return fetch("your-update-api-endpoint", {
-                        method: "POST",
-                        body: JSON.stringify({ newTitle }),
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                      })
+                      return dispatch(
+                        updateSchema({
+                          data: { title: newTitle },
+                          id: schema._id,
+                        })
+                      )
                         .then((response) => {
-                          if (!response.ok) {
-                            throw new Error(response.statusText);
+                          console.log(response.payload);
+                          dispatch(getFilesSchema());
+
+                          if (response.payload && response.payload.data) {
+                            Swal.fire({
+                              title: "updated",
+                              icon: "success",
+                            });
+                            return true;
                           }
-                          return response.json();
+                          if (!response.payload.data) {
+                            throw new Error("error");
+                          }
                         })
                         .catch((error) => {
+                          console.error("Error:", error);
                           Swal.showValidationMessage(
                             `Request failed: ${error}`
                           );
+                          return false;
                         });
                     },
                     allowOutsideClick: () => !Swal.isLoading(),
                   }).then((result) => {
                     if (result.dismiss === Swal.DismissReason.cancel) {
                       // Handle delete logic here, e.g., call an API to delete the schema
-                      fetch("your-delete-api-endpoint")
-                        .then((response) => {
-                          if (!response.ok) {
-                            throw new Error(response.statusText);
-                          }
-                          return response.json();
+                      dispatch(deleteSchema(schema._id))
+                        .then(() => {
+                          dispatch(getFilesSchema());
                         })
-                        .then((data) => {
+                        .then(() => {
                           Swal.fire({
                             title: "Deleted",
                             icon: "success",

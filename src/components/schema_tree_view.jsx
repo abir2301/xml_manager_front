@@ -37,6 +37,16 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FnInstance from "../utulies/functions";
 import { dataStatic } from "../utulies/data";
 import Colors from "../utulies/colors";
+import "../styles/style.css";
+import {
+  postElement,
+  getFilesSchema,
+  deleteElement,
+  updateElement,
+} from "../features/schemas/slice";
+import Swal from "sweetalert2";
+
+import { useDispatch } from "react-redux";
 function TransitionComponent(props) {
   const style = useSpring({
     from: {
@@ -65,6 +75,8 @@ export default function SchemasTreeView({ schema }) {
   }, [schema]);
 
   const ListItemComponent = ({ item, index }) => {
+    const dispatch = useDispatch();
+
     const [openIndexes, setOpenIndexes] = React.useState([]);
     const [open, setOpen] = React.useState(false);
     const [openStates, setOpenStates] = React.useState({});
@@ -84,6 +96,99 @@ export default function SchemasTreeView({ schema }) {
         setOpenIndexes([...openIndexes, index]);
       }
     };
+    const handleDeleteNode = () => {
+      console.log(item._id);
+      dispatch(deleteElement({ id: item._id }))
+        .then((response) => {
+          if (response && response.payload) {
+            console.log("delete item ");
+
+            console.log(response.payload.message);
+            dispatch(getFilesSchema);
+
+            Swal.fire({
+              position: "center",
+
+              title: "Deleted succesfully ",
+              icon: "success",
+            });
+          }
+        })
+        .catch((error) => {
+          Swal.fire({
+            position: "center",
+
+            icon: "error",
+            title: "Oops...",
+            text: "Something went wrong!",
+          });
+        });
+    };
+    const handleUpdateNode = () => {
+      Swal.fire({
+        title: "Update Element",
+        html: `
+    <input id="name"  value =${
+      item.name
+    } class="swal2-input sweet-input" placeholder="Name" >
+    <input id="type" value =${
+      item.type
+    } class="swal2-input sweet-input" placeholder="Type" >
+    <select id="is_attribute" class="swal2-select sweet-input">
+      <option value="true" ${
+        item.is_attribute ? "selected" : ""
+      }>Attribute</option>
+      <option value="false" ${
+        !item.is_attribute ? "selected" : ""
+      } >Not an Attribute</option>
+    </select>
+    <input id="levelH" value =${
+      item.lavelH
+    } class="swal2-input sweet-input" type="number" placeholder="LevelH" >
+  `,
+        showCancelButton: true,
+        confirmButtonText: "Update",
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+          const name = Swal.getPopup().querySelector("#name").value;
+          const type = Swal.getPopup().querySelector("#type").value;
+          const isAttribute =
+            Swal.getPopup().querySelector("#is_attribute").value === "true";
+          const levelH = parseInt(
+            Swal.getPopup().querySelector("#levelH").value
+          );
+
+          // Validate inputs here if needed
+
+          // Return an object with the collected values
+          return { name, type, isAttribute, levelH };
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Access the values returned from the preConfirm function
+          const { name, type, isAttribute, levelH } = result.value;
+
+          dispatch(
+            updateElement({
+              data: {
+                name: name,
+                type: type,
+                is_attribute: isAttribute,
+                lavelH: levelH,
+              },
+              id: item._id,
+            })
+          ).then((response) => {
+            if (response && response.payload) {
+              console.log(response.payload.message);
+            }
+          });
+
+          // You can then make an API call or perform any other actions here
+        }
+      });
+    };
     const handleAddClick = () => {
       setShowAddForm(true);
     };
@@ -95,46 +200,34 @@ export default function SchemasTreeView({ schema }) {
     };
     // const length = item.childrens.length;
 
-    const addNodeToParent = (
-      parentId,
-      newNodeName,
-      newNodeType,
-      isAttribute
-    ) => {
-      setData((prevData) => {
-        const newData = [...prevData];
-        const parentNode = FnInstance.getParent(newData, parentId);
-        console.log(parentNode);
-
-        if (parentNode) {
-          const newNode = {
-            _id: FnInstance.generateUniqueId(),
-            name: newNodeName,
-            type: newNodeType,
-            parent_id: parentId,
-            is_attribute: isAttribute,
-            childrens: [],
-          };
-          Object.preventExtensions(parentNode);
-          console.log(Object.isExtensible(parentNode));
-          parentNode.childrens.push(newNode);
-          console.log(newNode);
-        }
-
-        return newData;
-      });
-    };
     const handleAddNode = () => {
-      addNodeToParent(item._id, newNodeName, newNodeType, isAtribbute);
-
-      console.log(
-        "Adding new node:",
-        newNodeName,
-        newNodeType,
-        isAtribbute,
-        item._id
-      );
-
+      if (newNodeName === "" || newNodeType == "") {
+        console.log("error");
+      } else {
+        console.log(
+          "Adding new node:",
+          newNodeName,
+          newNodeType,
+          isAtribbute,
+          item._id,
+          item.schema_id
+        );
+        dispatch(
+          postElement({
+            data: {
+              name: newNodeName,
+              type: newNodeType,
+              is_attribute: isAtribbute ? 1 : 0,
+              schema: item.schema_id,
+              lavelH: item.childrens.length,
+            },
+            id: item._id,
+          })
+        ).then((response) => {
+          dispatch(getFilesSchema());
+          console.log(response);
+        });
+      }
       // Reset form and hide it
       setShowAddForm(false);
       setNewNodeName("");
@@ -248,9 +341,11 @@ export default function SchemasTreeView({ schema }) {
               />
             )}
             <EditIcon
+              onClick={handleUpdateNode}
               sx={{ color: "green", fontSize: 28, paddingX: 1, marginY: 2 }}
             />
             <DeleteForeverIcon
+              onClick={handleDeleteNode}
               sx={{ color: "tomato", fontSize: 28, paddingX: 1, marginY: 2 }}
             />
           </Box>
@@ -320,12 +415,9 @@ export default function SchemasTreeView({ schema }) {
               ?.filter((nestedItem) => nestedItem !== null)
               .map((nestedItem, nestedIndex) =>
                 nestedItem.is_attribute ? (
-                  <Box
-                    key={nestedItem._id}
-                    sx={{ margin: "12px 0 0 20px", borderWidth: 5 }}
-                  >
+                  <Box sx={{ margin: "12px 0 0 20px", borderWidth: 5 }}>
                     <ListItemComponent
-                      key={nestedItem._id}
+                      key={nestedItem._id * nestedIndex}
                       item={nestedItem}
                       index={nestedIndex}
                       open={openStates[nestedItem._id]}
@@ -334,7 +426,7 @@ export default function SchemasTreeView({ schema }) {
                 ) : (
                   <Box key={nestedItem._id} sx={{ margin: "12px 0 0 20px" }}>
                     <ListItemComponent
-                      key={nestedItem._id}
+                      key={nestedItem._id * nestedIndex}
                       item={nestedItem}
                       index={nestedIndex}
                       open={openStates[nestedItem._id]}
@@ -368,7 +460,7 @@ export default function SchemasTreeView({ schema }) {
               <>
                 {item != null ? (
                   <ListItemComponent
-                    key={item._id}
+                    key={item._id * index}
                     item={item}
                     index={index}
                     schema={schema}

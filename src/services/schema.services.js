@@ -15,5 +15,14 @@ class SchemaDataService {
   delete(id) {
     return http.delete(`/file_schema/${id}`);
   }
+  postElement(data, id) {
+    return http.post(`/xml_element/${id}`, data);
+  }
+  deleteElement(id) {
+    return http.delete(`/xml_element/${id}`);
+  }
+  updateElement(data, id) {
+    return http.put(`/xml_element/${id}`, data);
+  }
 }
 export default new SchemaDataService();

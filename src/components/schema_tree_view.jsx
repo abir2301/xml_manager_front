@@ -5,6 +5,8 @@ import { alpha, styled } from "@mui/material/styles";
 import TreeView from "@mui/lab/TreeView";
 import {
   Box,
+  Button,
+  FormHelperText,
   IconButton,
   Typography,
   InputLabel,
@@ -38,6 +40,7 @@ import FnInstance from "../utulies/functions";
 import { dataStatic } from "../utulies/data";
 import Colors from "../utulies/colors";
 import "../styles/style.css";
+import { nodeType } from "../utulies/data";
 import {
   postElement,
   getFilesSchema,
@@ -45,7 +48,8 @@ import {
   updateElement,
 } from "../features/schemas/slice";
 import Swal from "sweetalert2";
-
+import SuccessAlert from "./sweet_alert/success";
+import FailAlert from "./sweet_alert/fail";
 import { useDispatch } from "react-redux";
 function TransitionComponent(props) {
   const style = useSpring({
@@ -70,6 +74,7 @@ export default function SchemasTreeView({ schema }) {
   const [open, setOpen] = React.useState(true);
   const [openIndexes, setOpenIndexes] = React.useState([0]);
   const [data, setData] = React.useState([]);
+
   React.useEffect(() => {
     setData(schema);
   }, [schema]);
@@ -85,8 +90,13 @@ export default function SchemasTreeView({ schema }) {
     const [newNodeName, setNewNodeName] = React.useState(""); // State to manage the new node name
     const [newNodeType, setNewNodeType] = React.useState("");
     const [isAtribbute, setIsAtribbute] = React.useState(false);
+    const [nodeNameError, setNodeNameError] = React.useState("");
+    const [nodeTypeError, setNodeTypeError] = React.useState("");
+    const [isAttributeError, setIsAttributeError] = React.useState("");
     // State to manage the new node type
-
+    const handleNodeTypeChange = (event) => {
+      setNewNodeType(event.target.value);
+    };
     const handleClick = () => {
       console.log(index);
       // Removed index parameter, as it's not used here
@@ -97,54 +107,67 @@ export default function SchemasTreeView({ schema }) {
       }
     };
     const handleDeleteNode = () => {
-      console.log(item._id);
       dispatch(deleteElement({ id: item._id }))
         .then((response) => {
           if (response && response.payload) {
-            console.log("delete item ");
-
-            console.log(response.payload.message);
-            dispatch(getFilesSchema);
-
-            Swal.fire({
-              position: "center",
-
-              title: "Deleted succesfully ",
-              icon: "success",
-            });
+            dispatch(getFilesSchema());
+            SuccessAlert({ message: response.payload.message });
           }
         })
         .catch((error) => {
-          Swal.fire({
-            position: "center",
-
-            icon: "error",
-            title: "Oops...",
-            text: "Something went wrong!",
-          });
+          FailAlert({ message: error });
         });
     };
+
     const handleUpdateNode = () => {
       Swal.fire({
         title: "Update Element",
         html: `
-    <input id="name"  value =${
-      item.name
-    } class="swal2-input sweet-input" placeholder="Name" >
-    <input id="type" value =${
-      item.type
-    } class="swal2-input sweet-input" placeholder="Type" >
-    <select id="is_attribute" class="swal2-select sweet-input">
-      <option value="true" ${
-        item.is_attribute ? "selected" : ""
-      }>Attribute</option>
-      <option value="false" ${
-        !item.is_attribute ? "selected" : ""
-      } >Not an Attribute</option>
-    </select>
-    <input id="levelH" value =${
-      item.lavelH
-    } class="swal2-input sweet-input" type="number" placeholder="LevelH" >
+      
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input id="name" value="${
+          item.name
+        }" class="swal2-input sweet-input" placeholder="Name" >
+      </div>
+    
+      <div class="form-group">
+  <label for="node_type">Node Type:</label>
+  <select id="type" class=" sweet-input">
+    <!-- Map the options from the nodeType array -->
+    ${nodeType
+      .map(
+        (type) => `
+      <option value="${type}" ${
+          item.node_type === type ? "selected" : ""
+        }>${type}</option>
+    `
+      )
+      .join("")}
+  </select>
+</div>
+   
+    
+ 
+      <div class="form-group">
+        <label for="is_attribute">Attribute:</label>
+        <select id="is_attribute" class=" sweet-input">
+          <option value="true" ${
+            item.is_attribute ? "selected" : ""
+          }>Attribute</option>
+          <option value="false" ${
+            !item.is_attribute ? "selected" : ""
+          }>Not an Attribute</option>
+        </select>
+      </div>
+    
+      <div class="form-group">
+        <label  for="levelH">LevelH:</label>
+        <input id="levelH" value="${
+          item.lavelH
+        }" class="swal2-input sweet-input" type="number" placeholder="LevelH" >
+      
+    </div>
   `,
         showCancelButton: true,
         confirmButtonText: "Update",
@@ -158,9 +181,6 @@ export default function SchemasTreeView({ schema }) {
             Swal.getPopup().querySelector("#levelH").value
           );
 
-          // Validate inputs here if needed
-
-          // Return an object with the collected values
           return { name, type, isAttribute, levelH };
         },
         allowOutsideClick: () => !Swal.isLoading(),
@@ -179,13 +199,17 @@ export default function SchemasTreeView({ schema }) {
               },
               id: item._id,
             })
-          ).then((response) => {
-            if (response && response.payload) {
-              console.log(response.payload.message);
-            }
-          });
+          )
+            .then((response) => {
+              if (response && response.payload) {
+                dispatch(getFilesSchema());
 
-          // You can then make an API call or perform any other actions here
+                SuccessAlert({ message: response.payload.message });
+              }
+            })
+            .catch((error) => {
+              FailAlert({ message: error });
+            });
         }
       });
     };
@@ -201,7 +225,19 @@ export default function SchemasTreeView({ schema }) {
     // const length = item.childrens.length;
 
     const handleAddNode = () => {
-      if (newNodeName === "" || newNodeType == "") {
+      setNodeNameError("");
+      setNodeTypeError("");
+      setIsAttributeError("");
+      if (newNodeName.trim() === "") {
+        setNodeNameError("Node name is required");
+        return;
+      }
+
+      if (newNodeType.trim() === "") {
+        setNodeTypeError("Node type is required");
+        return;
+      }
+      if (newNodeName === "" || newNodeType === "") {
         console.log("error");
       } else {
         console.log(
@@ -224,8 +260,15 @@ export default function SchemasTreeView({ schema }) {
             id: item._id,
           })
         ).then((response) => {
-          dispatch(getFilesSchema());
-          console.log(response);
+          if (response && response.payload) {
+            if (response.payload.success) {
+              SuccessAlert({ message: response.payload.message });
+              dispatch(getFilesSchema());
+              console.log(response);
+            } else {
+              FailAlert({ message: response.payload.message });
+            }
+          }
         });
       }
       // Reset form and hide it
@@ -354,28 +397,79 @@ export default function SchemasTreeView({ schema }) {
           <Box
             sx={{
               flexDirection: "row",
-              margin: "10px",
+              marginY: 5,
+              marginX: 3,
               display: "flex",
+              // backgroundColor: "#f5f5f5",
+              borderRadius: "8px",
               rowGap: "20px",
               columnGap: "20px",
             }}
           >
             <TextField
-              sx={{}}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3, // Adjust the border radius as needed
+                  border: "2px #8E8E8E", // Add a thicker border and adjust the color
+                  "& fieldset": {
+                    borderColor: "#000", // Border color when not focused
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#000", // Border color on hover
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#000", // Border color when focused
+                  },
+                },
+              }}
               variant="outlined"
               type="text"
               height={"20px"}
               placeholder="Node_name"
               value={newNodeName}
               onChange={(e) => setNewNodeName(e.target.value)}
+              error={Boolean(nodeNameError)}
+              helperText={nodeNameError}
             />
-            <TextField
+            {/* <TextField
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3, // Adjust the border radius as needed
+                  border: "2px #8E8E8E",
+                  "& fieldset": {
+                    borderColor: "#8E8E8E",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#000",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#8E8E8E",
+                  },
+                },
+              }}
               type="text"
               height={"20px"}
               placeholder="Node Type"
               value={newNodeType}
               onChange={(e) => setNewNodeType(e.target.value)}
-            />
+              error={Boolean(nodeTypeError)}
+              helperText={nodeTypeError}
+            /> */}
+            <FormControl variant="filled" sx={{ minWidth: 120 }}>
+              <InputLabel id="node-type-label">Node Type</InputLabel>
+              <Select
+                labelId="node-type-label"
+                id="node-type-select"
+                value={newNodeType}
+                onChange={handleNodeTypeChange}
+              >
+                {nodeType.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <FormControl variant="filled" sx={{ minWidth: 120 }}>
               <InputLabel id="demo-simple-select-standard-label">
                 is_attribute
@@ -383,6 +477,7 @@ export default function SchemasTreeView({ schema }) {
               <Select
                 sx={{ color: "black" }}
                 id="demo-simple-select-standard"
+                error={Boolean(isAttributeError)}
                 value={isAtribbute}
                 onChange={(e) => {
                   setIsAtribbute(e.target.value);
@@ -391,11 +486,23 @@ export default function SchemasTreeView({ schema }) {
                 <MenuItem value={true}>true</MenuItem>
                 <MenuItem value={false}>false</MenuItem>
               </Select>
+              <FormHelperText>{isAttributeError}</FormHelperText>
             </FormControl>
-            <button onClick={handleAddNode}>Add Node</button>
-            <button onClick={handleDeleteClick}>
-              <DeleteIcon></DeleteIcon>
-            </button>
+            {/* <Button variant="contained" color="primary" onClick={handleAddNode}>
+              Add Node
+            </Button> */}
+            <Button onClick={handleAddNode} color="primary" variant="contained">
+              Add Node
+            </Button>
+            <Button
+              sx={{ height: 60 }}
+              onClick={handleDeleteClick}
+              variant="contained"
+            >
+              <DeleteIcon
+                sx={{ color: "tomato", fontSize: 28, paddingX: 1, marginY: 2 }}
+              ></DeleteIcon>
+            </Button>
           </Box>
         )}
         <Collapse

@@ -212,4 +212,5 @@ var dataStatic = [
     },
   },
 ];
-export { dataStatic };
+var nodeType = ["string", "number", "date", "compose"];
+export { nodeType };

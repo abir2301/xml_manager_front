@@ -1,19 +1,68 @@
 .schemaButton {
-            margin: 1;
-            margin-bottom: 2;
-            border-radius: 2;
-            padding-top: 2;
-            padding-bottom: 2;
-            gap: 2;
-            width: "100%"; 
-            text-align: "left";
-            border-color: "#7085F4";
-            background-color: "#F5F9FF";
+  margin: 1;
+  margin-bottom: 2;
+  border-radius: 2;
+  padding-top: 2;
+  padding-bottom: 2;
+  gap: 2;
+  width: "100%";
+  text-align: "left";
+  border-color: "#7085F4";
+  background-color: "#F5F9FF";
 }
 
 .sweet-input {
-    border: 3px solid #b4dbed;
-    border-radius: 10px;
-    padding: 10px;
-    font-size: 25px;
+  border: 3px solid #b4dbed;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 25px;
 }
+.alert-title {
+  color: #7085F4;
+  font-weight: bold;
+}
+
+
+.row {
+  display: flex;
+  /* Display elements in a row */
+  /* justify-content: space-between; */
+  flex-direction: column;
+  /* Space evenly between elements */
+  align-items: center;
+  /* Align items vertically center */
+  margin-bottom: 10px;
+  /* Add some space between rows */
+}
+.form-group {
+  flex-basis: 30%;
+  flex: 1;
+  flex-direction: row;
+  justify-content: flex-start;
+  text-align: start;
+  margin: 10px;
+  flex: 1;
+}
+
+.form-group label {
+  flex-basis: 30%;
+  text-align: right;
+  font-weight: bold;
+  font-size: 25px;
+  text-align: center;
+ 
+}
+
+/* Style for the inputs */
+.form-group input {
+    width: 50%;
+}
+.form-group select {
+  flex-grow: 1;
+  padding: 5px;
+}
+
+/* .form-group select {
+  width: 80%;
+} */
+

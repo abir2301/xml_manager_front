@@ -19,13 +19,20 @@ export const deleteSchema = createAsyncThunk(
   "file_schema/delete",
   async (id) => {
     const res = await SchemaDataService.delete(id);
+    return res.data;
   }
 );
 export const postElement = createAsyncThunk(
   "xml_element/post",
-  async ({ data, id }) => {
-    const res = await SchemaDataService.postElement(data, id);
-    return res.data;
+  async ({ data, id }, { rejectWithValue }) => {
+    try {
+      const res = await SchemaDataService.postElement(data, id);
+      console.log(res);
+      return res.data;
+    } catch (error) {
+      // If the error response has a message, it will be stored in error.response.data.message
+      return rejectWithValue(error.response.data || "An error occurred");
+    }
   }
 );
 export const deleteElement = createAsyncThunk(
@@ -38,9 +45,16 @@ export const deleteElement = createAsyncThunk(
 );
 export const updateElement = createAsyncThunk(
   "xml_element/update",
-  async ({ data, id }) => {
-    const res = await SchemaDataService.updateElement(data, id);
-    return res.data;
+  async ({ data, id }, { rejectWithValue }) => {
+    try {
+      const res = await SchemaDataService.updateElement(data, id);
+      console.log(res);
+
+      return res.data;
+    } catch (error) {
+      // If the error response has a message, it will be stored in error.response.data.message
+      return rejectWithValue(error.response.data || "An error occurred");
+    }
   }
 );
 
@@ -80,6 +94,7 @@ export const fileSlice = createSlice({
     [deleteSchema.fulfilled]: (state, action) => {
       state.loading = false;
       state.success = true;
+      state.fileSchemas = action.payload.data;
     },
     [deleteSchema.rejected]: (state, action) => {
       state.loading = false;
@@ -91,6 +106,7 @@ export const fileSlice = createSlice({
     [postElement.fulfilled]: (state, action) => {
       state.loading = false;
       state.success = true;
+      state.fileSchemas = action.payload.data;
     },
     [postElement.rejected]: (state, action) => {
       state.loading = false;
@@ -102,8 +118,21 @@ export const fileSlice = createSlice({
     [deleteElement.fulfilled]: (state, action) => {
       state.loading = false;
       state.success = true;
+      state.fileSchemas = action.payload.data;
     },
     [deleteElement.rejected]: (state, action) => {
+      state.loading = false;
+      state.success = false;
+    },
+    [updateElement.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [updateElement.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.success = true;
+      state.fileSchemas = action.payload.data;
+    },
+    [updateElement.rejected]: (state, action) => {
       state.loading = false;
       state.success = false;
     },

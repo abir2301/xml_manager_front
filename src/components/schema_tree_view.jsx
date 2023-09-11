@@ -50,7 +50,7 @@ import {
 import Swal from "sweetalert2";
 import SuccessAlert from "./sweet_alert/success";
 import FailAlert from "./sweet_alert/fail";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 function TransitionComponent(props) {
   const style = useSpring({
     from: {
@@ -75,17 +75,32 @@ export default function SchemasTreeView({ schema }) {
   const [openIndexes, setOpenIndexes] = React.useState([0]);
   const [data, setData] = React.useState([]);
 
+  console.log("schema from schema.js ");
+  console.log(schema);
+  const selectedSchemaId = schema._id;
+  console.log(selectedSchemaId);
+
+  const fileSchemas = useSelector((state) => state.file.fileSchemas);
+  var selectedSchemaData = [];
+  // for (schema in fileSchemas) {
+  //   if (schema._id === selectedSchemaId) {
+  //     selectedSchemaData = schema;
+  //   }
+  // }
+  console.log(selectedSchemaData);
+
   React.useEffect(() => {
     setData(schema);
   }, [schema]);
 
   const ListItemComponent = ({ item, index }) => {
     const dispatch = useDispatch();
+    const fileReducer = useSelector((state) => state.file); // Get schemaList from the store
 
     const [openIndexes, setOpenIndexes] = React.useState([]);
     const [open, setOpen] = React.useState(false);
     const [openStates, setOpenStates] = React.useState({});
-    const [data, setData] = React.useState(schema);
+
     const [showAddForm, setShowAddForm] = React.useState(false); // State to show/hide the add form
     const [newNodeName, setNewNodeName] = React.useState(""); // State to manage the new node name
     const [newNodeType, setNewNodeType] = React.useState("");
@@ -110,7 +125,6 @@ export default function SchemasTreeView({ schema }) {
       dispatch(deleteElement({ id: item._id }))
         .then((response) => {
           if (response && response.payload) {
-            dispatch(getFilesSchema());
             SuccessAlert({ message: response.payload.message });
           }
         })
@@ -146,9 +160,6 @@ export default function SchemasTreeView({ schema }) {
       .join("")}
   </select>
 </div>
-   
-    
- 
       <div class="form-group">
         <label for="is_attribute">Attribute:</label>
         <select id="is_attribute" class=" sweet-input">
@@ -176,7 +187,9 @@ export default function SchemasTreeView({ schema }) {
           const name = Swal.getPopup().querySelector("#name").value;
           const type = Swal.getPopup().querySelector("#type").value;
           const isAttribute =
-            Swal.getPopup().querySelector("#is_attribute").value === "true";
+            Swal.getPopup().querySelector("#is_attribute").value === "true"
+              ? 1
+              : 0;
           const levelH = parseInt(
             Swal.getPopup().querySelector("#levelH").value
           );
@@ -201,10 +214,14 @@ export default function SchemasTreeView({ schema }) {
             })
           )
             .then((response) => {
+              console.log(response);
               if (response && response.payload) {
-                dispatch(getFilesSchema());
-
-                SuccessAlert({ message: response.payload.message });
+                if (response.payload.success) {
+                  SuccessAlert({ message: response.payload.message });
+                } else {
+                  console.log(response.payload);
+                  FailAlert({ message: response.payload.message });
+                }
               }
             })
             .catch((error) => {
@@ -259,17 +276,23 @@ export default function SchemasTreeView({ schema }) {
             },
             id: item._id,
           })
-        ).then((response) => {
-          if (response && response.payload) {
-            if (response.payload.success) {
-              SuccessAlert({ message: response.payload.message });
-              dispatch(getFilesSchema());
-              console.log(response);
-            } else {
-              FailAlert({ message: response.payload.message });
+        )
+          .then((response) => {
+            console.log(response);
+            if (response && response.payload) {
+              if (response.payload.success) {
+                SuccessAlert({ message: response.payload.message });
+                console.log(response);
+              } else {
+                console.log(response.payload);
+                FailAlert({ message: response.payload.message });
+              }
             }
-          }
-        });
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            FailAlert(error);
+          });
       }
       // Reset form and hide it
       setShowAddForm(false);

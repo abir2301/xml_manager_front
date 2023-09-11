@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  Container,
-  Typography,
-  Scrollbar,
-  Box,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Button,
-} from "@mui/material";
+import { Typography, Box, Button } from "@mui/material";
 import "../styles/style.css";
 import Colors from "../utulies/colors";
 import { useState, useEffect } from "react";
@@ -28,7 +19,7 @@ const SchemaList = ({ onChange }) => {
 
   useEffect(() => {
     dispatch(getFilesSchema());
-  }, [dispatch]);
+  }, []);
 
   return (
     <Box

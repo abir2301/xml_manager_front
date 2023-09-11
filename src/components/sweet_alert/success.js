@@ -11,6 +11,7 @@ const SuccessAlert = (props) => {
     text: props.message,
     customClass: {
       title: "alert-title",
+      confirmButton: "confirm-button",
     },
   });
 };

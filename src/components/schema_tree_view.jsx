@@ -70,28 +70,18 @@ function TransitionComponent(props) {
   );
 }
 
-export default function SchemasTreeView({ schema }) {
+export default function SchemasTreeView() {
   const [open, setOpen] = React.useState(true);
   const [openIndexes, setOpenIndexes] = React.useState([0]);
   const [data, setData] = React.useState([]);
 
-  console.log("schema from schema.js ");
-  console.log(schema);
-  const selectedSchemaId = schema._id;
-  console.log(selectedSchemaId);
-
-  const fileSchemas = useSelector((state) => state.file.fileSchemas);
-  var selectedSchemaData = [];
-  // for (schema in fileSchemas) {
-  //   if (schema._id === selectedSchemaId) {
-  //     selectedSchemaData = schema;
-  //   }
-  // }
-  console.log(selectedSchemaData);
+  const fileReducer = useSelector((state) => state.file);
 
   React.useEffect(() => {
-    setData(schema);
-  }, [schema]);
+    console.log("sellected ");
+    console.log(fileReducer.selectedSchema);
+    setData(fileReducer.selectedSchema);
+  }, [fileReducer.selectedSchema]);
 
   const ListItemComponent = ({ item, index }) => {
     const dispatch = useDispatch();
@@ -214,12 +204,12 @@ export default function SchemasTreeView({ schema }) {
             })
           )
             .then((response) => {
-              console.log(response);
+              //  console.log(response);
               if (response && response.payload) {
                 if (response.payload.success) {
                   SuccessAlert({ message: response.payload.message });
                 } else {
-                  console.log(response.payload);
+                  //   console.log(response.payload);
                   FailAlert({ message: response.payload.message });
                 }
               }
@@ -255,16 +245,7 @@ export default function SchemasTreeView({ schema }) {
         return;
       }
       if (newNodeName === "" || newNodeType === "") {
-        console.log("error");
       } else {
-        console.log(
-          "Adding new node:",
-          newNodeName,
-          newNodeType,
-          isAtribbute,
-          item._id,
-          item.schema_id
-        );
         dispatch(
           postElement({
             data: {
@@ -282,9 +263,7 @@ export default function SchemasTreeView({ schema }) {
             if (response && response.payload) {
               if (response.payload.success) {
                 SuccessAlert({ message: response.payload.message });
-                console.log(response);
               } else {
-                console.log(response.payload);
                 FailAlert({ message: response.payload.message });
               }
             }
@@ -408,11 +387,11 @@ export default function SchemasTreeView({ schema }) {
             )}
             <EditIcon
               onClick={handleUpdateNode}
-              sx={{ color: "green", fontSize: 28, paddingX: 1, marginY: 2 }}
+              sx={{ color: "green", fontSize: 40, paddingX: 1, marginY: 2 }}
             />
             <DeleteForeverIcon
               onClick={handleDeleteNode}
-              sx={{ color: "tomato", fontSize: 28, paddingX: 1, marginY: 2 }}
+              sx={{ color: "tomato", fontSize: 40, paddingX: 1, marginY: 2 }}
             />
           </Box>
         </Box>
@@ -454,30 +433,7 @@ export default function SchemasTreeView({ schema }) {
               error={Boolean(nodeNameError)}
               helperText={nodeNameError}
             />
-            {/* <TextField
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 3, // Adjust the border radius as needed
-                  border: "2px #8E8E8E",
-                  "& fieldset": {
-                    borderColor: "#8E8E8E",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#000",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#8E8E8E",
-                  },
-                },
-              }}
-              type="text"
-              height={"20px"}
-              placeholder="Node Type"
-              value={newNodeType}
-              onChange={(e) => setNewNodeType(e.target.value)}
-              error={Boolean(nodeTypeError)}
-              helperText={nodeTypeError}
-            /> */}
+
             <FormControl variant="filled" sx={{ minWidth: 120 }}>
               <InputLabel id="node-type-label">Node Type</InputLabel>
               <Select
@@ -523,7 +479,7 @@ export default function SchemasTreeView({ schema }) {
               variant="contained"
             >
               <DeleteIcon
-                sx={{ color: "tomato", fontSize: 28, paddingX: 1, marginY: 2 }}
+                sx={{ color: "tomato", fontSize: 40, paddingX: 1, marginY: 2 }}
               ></DeleteIcon>
             </Button>
           </Box>
@@ -586,32 +542,38 @@ export default function SchemasTreeView({ schema }) {
           }}
         >
           <List component="div" disablePadding>
-            {data.map((item, index) => (
+            {fileReducer.loading ? (
+              <>loading</>
+            ) : (
               <>
-                {item != null ? (
-                  <ListItemComponent
-                    key={item._id * index}
-                    item={item}
-                    index={index}
-                    schema={schema}
-                  ></ListItemComponent>
-                ) : (
-                  <Typography
-                    sx={{
-                      fontWeight: "bold",
-                      textAlign: "center",
-                      marginTop: 5,
-                      color: "black",
-                    }}
-                    variant="h5"
-                    gutterBottom
-                  >
-                    {" "}
-                    empty Schema{" "}
-                  </Typography>
-                )}
+                {fileReducer?.selectedSchema?.data?.map((item, index) => (
+                  <>
+                    {item != null ? (
+                      <ListItemComponent
+                        key={item._id * index}
+                        item={item}
+                        index={index}
+                        schema={fileReducer.selectedSchema}
+                      ></ListItemComponent>
+                    ) : (
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                          textAlign: "center",
+                          marginTop: 5,
+                          color: "black",
+                        }}
+                        variant="h5"
+                        gutterBottom
+                      >
+                        {" "}
+                        empty Schema{" "}
+                      </Typography>
+                    )}
+                  </>
+                ))}
               </>
-            ))}
+            )}
           </List>
         </Collapse>
       </List>

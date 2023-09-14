@@ -24,5 +24,17 @@ class SchemaDataService {
   updateElement(data, id) {
     return http.put(`/xml_element/${id}`, data);
   }
+  exportSchema(id) {
+    return http.post(`/file_schema/${id}`);
+  }
+  downloadSchema() {
+    return http.get(`/xsdFiles/schema.xsd`);
+  }
+  userLogin(data) {
+    return http.get(`/user/login`, data);
+  }
+  userRegister(data) {
+    return http.get(`/user/register`, data);
+  }
 }
 export default new SchemaDataService();

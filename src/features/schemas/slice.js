@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import SchemaDataService from "../../services/schema.services";
-
+import FileSchema from "../../entities/Schema";
 export const getFilesSchema = createAsyncThunk(
   "file_schema/retrieve",
   async () => {
@@ -22,6 +22,19 @@ export const deleteSchema = createAsyncThunk(
     return res.data;
   }
 );
+export const postSchema = createAsyncThunk(
+  "file_schema/post",
+  async ({ data }, { rejectWithValue }) => {
+    try {
+      const res = await SchemaDataService.create(data);
+      console.log(res.data);
+      return res.data;
+    } catch (error) {
+      // If the error response has a message, it will be stored in error.response.data.message
+      return rejectWithValue(error.response.data || "An error occurred");
+    }
+  }
+);
 export const postElement = createAsyncThunk(
   "xml_element/post",
   async ({ data, id }, { rejectWithValue }) => {
@@ -30,7 +43,6 @@ export const postElement = createAsyncThunk(
       console.log(res);
       return res.data;
     } catch (error) {
-      // If the error response has a message, it will be stored in error.response.data.message
       return rejectWithValue(error.response.data || "An error occurred");
     }
   }
@@ -57,11 +69,36 @@ export const updateElement = createAsyncThunk(
     }
   }
 );
+export const setSelectedSchema = createAsyncThunk(
+  "xml_element/setSelectedSchema",
+  async ({ schema }) => {
+    console.log(schema);
+
+    return schema;
+  }
+);
+export const dowloadSchema = createAsyncThunk(
+  "xml_element/download",
+  async ({ id }) => {
+    try {
+      const res = await SchemaDataService.exportSchema(id);
+      if (res.data.success) {
+        const schema = await SchemaDataService.downloadSchema();
+        return schema.data;
+      }
+    } catch (error) {}
+  }
+);
 
 export const fileSlice = createSlice({
   name: "file",
-  initialState: { loading: false, fileSchemas: [], data: {}, success: false },
-
+  initialState: {
+    loading: false,
+    fileSchemas: [],
+    data: {},
+    success: false,
+    selectedSchema: new FileSchema(),
+  },
   extraReducers: {
     [getFilesSchema.pending]: (state, action) => {
       state.loading = true;
@@ -106,7 +143,7 @@ export const fileSlice = createSlice({
     [postElement.fulfilled]: (state, action) => {
       state.loading = false;
       state.success = true;
-      state.fileSchemas = action.payload.data;
+      state.selectedSchema = action.payload.data;
     },
     [postElement.rejected]: (state, action) => {
       state.loading = false;
@@ -118,7 +155,7 @@ export const fileSlice = createSlice({
     [deleteElement.fulfilled]: (state, action) => {
       state.loading = false;
       state.success = true;
-      state.fileSchemas = action.payload.data;
+      state.selectedSchema = action.payload.data;
     },
     [deleteElement.rejected]: (state, action) => {
       state.loading = false;
@@ -130,9 +167,45 @@ export const fileSlice = createSlice({
     [updateElement.fulfilled]: (state, action) => {
       state.loading = false;
       state.success = true;
-      state.fileSchemas = action.payload.data;
+      state.selectedSchema = action.payload.data;
     },
     [updateElement.rejected]: (state, action) => {
+      state.loading = false;
+      state.success = false;
+    },
+    [setSelectedSchema.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [setSelectedSchema.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.success = true;
+      state.selectedSchema = action.payload;
+    },
+    [setSelectedSchema.rejected]: (state, action) => {
+      state.loading = false;
+      state.success = false;
+    },
+    [postSchema.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [postSchema.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.success = true;
+      state.selectedSchema = action.payload.data;
+    },
+    [postSchema.rejected]: (state, action) => {
+      state.loading = false;
+      state.success = false;
+    },
+    [dowloadSchema.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [dowloadSchema.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.success = true;
+      // state.selectedSchema = action.payload.data;
+    },
+    [dowloadSchema.rejected]: (state, action) => {
       state.loading = false;
       state.success = false;
     },

@@ -16,15 +16,29 @@ import theme from "./styles/theme";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import Schemas from "./screens/schema";
-function App(props) {
-  const drawerWidth = 200;
+import AuthScreen from "./screens/auth";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+function App(props) {
+  const token = localStorage.getItem("token");
   return (
-    <>
-      <Provider store={store}>
-        <Schemas></Schemas>
-      </Provider>
-    </>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<AuthScreen />}></Route>
+
+          <Route
+            path="/schemas"
+            element={token !== null ? <Schemas /> : <AuthScreen />}
+          />
+        </Routes>
+      </BrowserRouter>
+    </Provider>
+    // <>
+    //
+    //     <AuthScreen></AuthScreen>
+    //   </Provider>
+    // </>
   );
 }
 

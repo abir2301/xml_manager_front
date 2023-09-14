@@ -2,24 +2,27 @@ import React from "react";
 import { Typography, Box, Button } from "@mui/material";
 import "../styles/style.css";
 import Colors from "../utulies/colors";
-import { useState, useEffect } from "react";
+import { useState, useEffect, componentDidMount } from "react";
 import FolderIcon from "@mui/icons-material/Folder";
 import AddIcon from "@mui/icons-material/Add";
 import {
   getFilesSchema,
   updateSchema,
   deleteSchema,
+  postSchema,
 } from "../features/schemas/slice";
+import SuccessAlert from "./sweet_alert/success";
+import FailAlert from "./sweet_alert/fail";
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 const SchemaList = ({ onChange }) => {
-  const dispatch = useDispatch();
+  const fileReducer = useSelector((state) => state.file);
 
-  const fileReducer = useSelector((state) => state.file); // Get schemaList from the store
+  const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getFilesSchema());
-  }, []);
+  }, [dispatch]);
 
   return (
     <Box
@@ -36,118 +39,148 @@ const SchemaList = ({ onChange }) => {
       ) : (
         <>
           {fileReducer?.fileSchemas?.length >= 0 ? (
-            fileReducer.fileSchemas?.map((schema) => (
-              <Button
-                className="schemaButton"
-                onClick={() => onChange(schema)}
-                onDoubleClick={() => {
-                  Swal.fire({
-                    title: "Manage Schema",
-                    customClass: {
-                      title: {
-                        color: Colors.purple,
+            fileReducer.fileSchemas?.map((schema) => {
+              const handleClick = (event) => {
+                console.log(event.detail);
+                switch (event.detail) {
+                  case 1: {
+                    onChange(schema);
+                    break;
+                  }
+                  case 2: {
+                    Swal.fire({
+                      title: "Manage Schema",
+                      customClass: {
+                        title: {
+                          color: Colors.purple,
+                        },
                       },
-                    },
-                    input: "text",
-                    inputValue: schema.title,
-                    inputLabel: "Schema New Title",
+                      input: "text",
+                      inputValue: schema.title,
+                      inputLabel: "Schema New Title",
 
-                    //                 html: `
-                    //   <input id="swal-input1" class="swal2-input" placeholder="New Schema Title" value="${schema.title}">
-                    // `,
-                    showCancelButton: true,
-                    confirmButtonText: "Update",
-                    cancelButtonText: "Delete",
-                    showCloseButton: true,
-                    showLoaderOnConfirm: true,
-                    preConfirm: (newTitle) => {
-                      console.log(newTitle);
-                      console.log(schema._id);
+                      //                 html: `
+                      //   <input id="swal-input1" class="swal2-input" placeholder="New Schema Title" value="${schema.title}">
+                      // `,
+                      showCancelButton: true,
+                      confirmButtonText: "Update",
+                      cancelButtonText: "Delete",
+                      showCloseButton: true,
+                      showLoaderOnConfirm: true,
+                      preConfirm: (newTitle) => {
+                        console.log(newTitle);
+                        console.log(schema._id);
 
-                      // Handle the update logic here, e.g., call an API to update the schema title
-                      return dispatch(
-                        updateSchema({
-                          data: { title: newTitle },
-                          id: schema._id,
-                        })
-                      )
-                        .then((response) => {
-                          console.log(response.payload);
-                          dispatch(getFilesSchema());
+                        // Handle the update logic here, e.g., call an API to update the schema title
+                        return dispatch(
+                          updateSchema({
+                            data: { title: newTitle },
+                            id: schema._id,
+                          })
+                        )
+                          .then((response) => {
+                            console.log(response.payload);
+                            dispatch(getFilesSchema());
 
-                          if (response.payload && response.payload.data) {
+                            if (response.payload && response.payload.data) {
+                              Swal.fire({
+                                title: "updated",
+                                icon: "success",
+                              });
+                              return true;
+                            }
+                            if (!response.payload.data) {
+                              throw new Error("error");
+                            }
+                          })
+                          .catch((error) => {
+                            console.error("Error:", error);
+                            Swal.showValidationMessage(
+                              `Request failed: ${error}`
+                            );
+                            return false;
+                          });
+                      },
+                      allowOutsideClick: () => !Swal.isLoading(),
+                    }).then((result) => {
+                      if (result.dismiss === Swal.DismissReason.cancel) {
+                        // Handle delete logic here, e.g., call an API to delete the schema
+                        dispatch(deleteSchema(schema._id))
+                          .then(() => {
+                            dispatch(getFilesSchema());
+                          })
+                          .then(() => {
                             Swal.fire({
-                              title: "updated",
+                              title: "Deleted",
                               icon: "success",
                             });
-                            return true;
-                          }
-                          if (!response.payload.data) {
-                            throw new Error("error");
-                          }
-                        })
-                        .catch((error) => {
-                          console.error("Error:", error);
-                          Swal.showValidationMessage(
-                            `Request failed: ${error}`
-                          );
-                          return false;
-                        });
-                    },
-                    allowOutsideClick: () => !Swal.isLoading(),
-                  }).then((result) => {
-                    if (result.dismiss === Swal.DismissReason.cancel) {
-                      // Handle delete logic here, e.g., call an API to delete the schema
-                      dispatch(deleteSchema(schema._id))
-                        .then(() => {
-                          dispatch(getFilesSchema());
-                        })
-                        .then(() => {
-                          Swal.fire({
-                            title: "Deleted",
-                            icon: "success",
+                          })
+                          .catch((error) => {
+                            Swal.fire({
+                              title: "Error",
+                              text: `Failed to delete: ${error}`,
+                              icon: "error",
+                            });
                           });
-                        })
-                        .catch((error) => {
-                          Swal.fire({
-                            title: "Error",
-                            text: `Failed to delete: ${error}`,
-                            icon: "error",
-                          });
-                        });
-                    }
-                  });
-                }}
-                size="large"
-                key={schema._id}
-                variant="outlined"
-                sx={{
-                  margin: 1,
-                  mb: 2,
-                  borderRadius: 2,
-                  paddingTop: 2,
-                  pb: 2,
-                  gap: 2,
-                  width: "100%", // Set the buttons' width to 100%
-                  textAlign: "left",
-                  borderColor: Colors.purple,
-                  backgroundColor: Colors.bg,
-                  // flexDirection: "column",
-                }}
-              >
-                <Typography
+                      }
+                    });
+
+                    break;
+                  }
+
+                  default: {
+                    break;
+                  }
+                }
+              };
+              const handleDoubleClick = () => {
+                console.log("update");
+                // Rest of your double-click logic here
+              };
+              return (
+                <Button
+                  className="schemaButton"
+                  onClick={handleClick}
+                  //onDoubleClick={handleClick}
+                  // onClick={() => onChange(schema)}
+                  //  onDoubleClick={handleDoubleClick}
+                  // onDoubleClick={
+                  //   handleDoubleClick
+                  //   //   () => {
+                  //   //   console.log("update");
+
+                  // }
+                  size="large"
+                  key={schema._id}
+                  variant="outlined"
                   sx={{
-                    fontSize: 16,
-                    color: "#1E1E1E",
-                    fontWeight: "normal",
+                    margin: 1,
+                    mb: 2,
+                    borderRadius: 2,
+                    paddingTop: 2,
+                    pb: 2,
+                    gap: 2,
+                    width: "100%", // Set the buttons' width to 100%
+                    textAlign: "left",
+                    borderColor: Colors.purple,
+                    backgroundColor: Colors.bg,
+                    // flexDirection: "column",
                   }}
                 >
-                  {schema.title}
-                </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: 16,
+                      color: "#1E1E1E",
+                      fontWeight: "normal",
+                    }}
+                  >
+                    {schema.title}
+                  </Typography>
 
-                <span> V :{schema.version}</span>
-              </Button>
-            ))
+                  <span> V :{schema.version}</span>
+                </Button>
+              );
+            })
           ) : (
             <div className="empty">
               <h2>no data yet </h2>
@@ -166,6 +199,53 @@ const SchemaList = ({ onChange }) => {
         }}
       >
         <Button
+          onClick={() => {
+            Swal.fire({
+              title: "Manage Schema",
+              customClass: {
+                title: {
+                  color: Colors.purple,
+                },
+              },
+              input: "text",
+
+              inputLabel: " New Schema  Title",
+
+              //                 html: `
+              //   <input id="swal-input1" class="swal2-input" placeholder="New Schema Title" value="${schema.title}">
+              // `,
+              showCancelButton: true,
+              confirmButtonText: "Create",
+              cancelButtonText: "Cancel",
+              showCloseButton: true,
+              showLoaderOnConfirm: true,
+              preConfirm: (newTitle) => {
+                console.log(newTitle);
+                return dispatch(
+                  postSchema({
+                    data: { title: newTitle },
+                  })
+                )
+                  .then((response) => {
+                    console.log(response.payload);
+
+                    if (response && response.payload) {
+                      if (response.payload.success) {
+                        SuccessAlert({ message: response.payload.message });
+                      } else {
+                        //   console.log(response.payload);
+                        FailAlert({ message: response.payload.message });
+                      }
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error:", error);
+                    Swal.showValidationMessage(`Request failed: ${error}`);
+                    return false;
+                  });
+              },
+            });
+          }}
           size="large"
           variant="outlined"
           sx={{

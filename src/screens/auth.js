@@ -9,6 +9,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import MailIcon from "@mui/icons-material/Mail";
+import PasswordIcon from "@mui/icons-material/Password";
+import PersonIcon from "@mui/icons-material/Person";
 import FacebookOutlinedIcon from "@mui/icons-material/FacebookOutlined";
 import GoogleIcon from "@mui/icons-material/Google";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -16,7 +19,13 @@ import { Facebook, Google, Twitter, GitHub } from "@mui/icons-material";
 import Colors from "../utulies/colors";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import theme from "../styles/theme";
 import { login, register } from "../features/auth/slice";
+import FormField from "../components/formField";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
@@ -25,27 +34,57 @@ const AuthScreen = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const dispatch = useDispatch();
-
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Prevent the default form submission behavior
-    // Log the input field values
-    console.log("Email or Username:", email);
-    console.log("Password:", password);
-    console.log("Remember Me:", rememberMe);
+  const [errors, setErrors] = React.useState({});
+  const message = useSelector((state) => state.message);
+  const handleError = (error, input) => {
+    setErrors((prevState) => ({ ...prevState, [input]: error }));
   };
   const handleLogin = (e) => {
-    e.preventDefault();
-    const data = {
-      email: email,
-      password: password,
-    };
-    dispatch(login(data)).then((response) => {
-      console.log(response);
-    });
+    let newErrors = {}; // Create a new error object
+
+    if (!email) {
+      newErrors.email = "Please input email";
+    }
+    if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    }
+
+    // Check if there are any errors
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors); // Update the errors state
+    } else {
+      e.preventDefault();
+      const data = {
+        email: email,
+        password: password,
+      };
+      dispatch(login(data))
+        .then((response) => {
+          console.log(message.message);
+          console.log(response);
+        })
+        .catch((error) => {
+          console.log(message.message);
+        });
+    }
   };
   const handleRegsiter = (e) => {
     e.preventDefault();
+    const data = {
+      user_name: firstName + "_" + lastName,
+      email: email,
+      password: password,
+    };
+    dispatch(register(data))
+      .then((response) => {
+        console.log(message);
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(message);
+      });
   };
+
   return (
     <Box
       sx={{
@@ -54,23 +93,24 @@ const AuthScreen = () => {
         display: "flex",
       }}
     >
+      <ToastContainer />
       <Paper
-        elevation={3}
+        elevation={20}
         sx={{
           padding: "20px",
           maxWidth: "700px",
 
           margin: "auto",
           marginTop: "5%",
-          backgroundColor: Colors.purple,
+          backgroundColor: Colors.bg,
           gap: 10,
         }}
       >
         <Box
           sx={{
             alignItems: "center",
-            width: "100%",
-            justifyContent: "space-evenly",
+            justifyContent: "center",
+            display: "flex",
           }}
         >
           <Button
@@ -81,18 +121,7 @@ const AuthScreen = () => {
               setFirstName("");
               setLastName("");
             }}
-            sx={{
-              margin: 5,
-              borderRadius: 1,
-              textAlign: "center",
-              fontSize: 15,
-              padding: 1,
-              fontWeight: "bold",
-              paddingX: 8,
-              borderWidth: 1,
-              border: "black",
-              bgcolor: Colors.white,
-            }}
+            sx={theme.buttonStyle}
           >
             LogIn
           </Button>
@@ -104,19 +133,7 @@ const AuthScreen = () => {
               setFirstName("");
               setLastName("");
             }}
-            sx={{
-              borderRadius: 1,
-              margin: 5,
-              textAlign: "center",
-              fontSize: 15,
-              fontWeight: "bold",
-              padding: 1,
-
-              paddingX: 8,
-              borderWidth: 1,
-              border: "black",
-              bgcolor: Colors.white,
-            }}
+            sx={theme.buttonStyle}
           >
             SignUp
           </Button>
@@ -129,7 +146,14 @@ const AuthScreen = () => {
             textAlign: "center",
           }}
         >
-          <Typography sx={{ fontSize: 25, fontWeight: "bold", margin: 3 }}>
+          <Typography
+            sx={{
+              fontSize: 25,
+              fontWeight: "bold",
+              margin: 3,
+              color: "#877C7C",
+            }}
+          >
             {isLogin ? "Login with" : "SignUp with"}
           </Typography>
           <Box
@@ -137,44 +161,45 @@ const AuthScreen = () => {
               justifyContent: "space-around",
             }}
           >
-            <GitHubIcon
-              sx={{ fontSize: 30, marginX: 3, color: Colors.white }}
-            ></GitHubIcon>
+            <GitHubIcon sx={theme.LoginWithIcon}></GitHubIcon>
             <FacebookOutlinedIcon
-              sx={{ fontSize: 30, marginX: 3, color: Colors.white }}
+              sx={theme.LoginWithIcon}
             ></FacebookOutlinedIcon>
-            <GoogleIcon
-              sx={{ fontSize: 30, marginX: 3, color: Colors.white }}
-            ></GoogleIcon>
+            <GoogleIcon sx={theme.LoginWithIcon}></GoogleIcon>
           </Box>
-          <Typography sx={{ fontSize: 25, fontWeight: "bold", margin: 3 }}>
+          <Typography
+            sx={{
+              fontSize: 25,
+              fontWeight: "bold",
+              margin: 1.5,
+              color: "#877C7C",
+            }}
+          >
             Or
           </Typography>
         </Box>
         <Box>
           {isLogin ? (
             <form>
-              <TextField
-                fullWidth
-                id="loginName"
-                label="Email"
-                variant="outlined"
-                margin="normal"
-                required
+              <FormField
+                label="email"
+                onFocus={() => handleError(null, "email")}
+                id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-              />
-              <TextField
-                fullWidth
-                id="loginPassword"
-                label="Password"
-                type="password"
-                variant="outlined"
-                margin="normal"
-                required
+                icon={<MailIcon></MailIcon>}
+                error={errors.email}
+              ></FormField>
+
+              <FormField
+                label="password"
+                id="password"
+                error={errors.password}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-              />
+                icon={<PasswordIcon></PasswordIcon>}
+              ></FormField>
+
               <Grid
                 container
                 alignItems="center"
@@ -205,53 +230,42 @@ const AuthScreen = () => {
             <form>
               <Grid container alignItems="center" justifyContent="space-around">
                 <Grid item>
-                  <TextField
-                    fullWidth
-                    id="last_name"
+                  <FormField
                     label="last_name"
-                    variant="outlined"
-                    margin="normal"
-                    required
+                    id="last_name"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                  />
+                    //  icon={<PersonIcon></PersonIcon>}
+                  ></FormField>
                 </Grid>
                 <Grid item>
-                  <TextField
-                    fullWidth
-                    id="first_name"
+                  <FormField
                     label="first_name"
-                    margin="normal"
-                    required
+                    id="first_name"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                  />
+                    // icon={<PersonIcon></PersonIcon>}
+                  ></FormField>
                 </Grid>
               </Grid>
-              <TextField
-                fullWidth
+              <FormField
+                label="email"
                 id="email"
-                label="Email "
-                variant="outlined"
-                margin="normal"
-                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-              />
-              <TextField
-                fullWidth
-                id="loginPassword"
-                label="Password"
-                type="password"
-                variant="outlined"
-                margin="normal"
-                required
+                icon={<MailIcon></MailIcon>}
+              ></FormField>
+
+              <FormField
+                label="password"
+                id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-              />
+                icon={<PasswordIcon></PasswordIcon>}
+              ></FormField>
 
               <Button
-                onClick={handleSubmit}
+                onClick={handleRegsiter}
                 type="submit"
                 variant="contained"
                 color="primary"
@@ -262,9 +276,6 @@ const AuthScreen = () => {
               </Button>
             </form>
           )}
-          <Typography variant="body2" sx={{ textAlign: "center", mt: 2 }}>
-            {isLogin ? `dont have an acount ` : "already have an acount"}
-          </Typography>
         </Box>
       </Paper>
     </Box>

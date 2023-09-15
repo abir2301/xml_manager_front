@@ -31,10 +31,10 @@ class SchemaDataService {
     return http.get(`/xsdFiles/schema.xsd`);
   }
   userLogin(data) {
-    return http.get(`/user/login`, data);
+    return http.post(`/user/login`, data);
   }
   userRegister(data) {
-    return http.get(`/user/register`, data);
+    return http.post(`/user/register`, data);
   }
 }
 export default new SchemaDataService();

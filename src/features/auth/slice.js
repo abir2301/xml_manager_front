@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import SchemaDataService from "../../services/schema.services";
 import { setMessage } from "./message.slice";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const login = createAsyncThunk("auth/login", async (data, thunkAPI) => {
   try {
@@ -8,13 +10,20 @@ export const login = createAsyncThunk("auth/login", async (data, thunkAPI) => {
     const result = await SchemaDataService.userLogin(data);
     console.log(result.data);
     localStorage.setItem("token", result.data.token);
+
     return result.data.data;
   } catch (error) {
     const errorMessage =
       (error.response && error.response.data && error.response.data.message) ||
       error.message ||
       error.toString();
-    await thunkAPI.dispatch(setMessage(errorMessage));
+
+    // await thunkAPI.dispatch(setMessage(errorMessage));
+    toast.error(errorMessage, {
+      autoClose: 3000,
+      pauseOnHover: false,
+    });
+
     return thunkAPI.rejectWithValue();
   }
 });
@@ -23,6 +32,8 @@ export const register = createAsyncThunk(
   async (data, thunkAPI) => {
     try {
       const result = await SchemaDataService.userRegister(data);
+      console.log(result);
+      localStorage.setItem("token", result.data.token);
 
       return result.data.data;
     } catch (error) {
@@ -32,6 +43,7 @@ export const register = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
+      console.log(errorMessage);
       await thunkAPI.dispatch(setMessage(errorMessage));
       return thunkAPI.rejectWithValue();
     }
@@ -45,6 +57,7 @@ export const logout = createAsyncThunk("auth/logout", async (thunkAPI) => {
       (error.response && error.response.data && error.response.data.message) ||
       error.message ||
       error.toString();
+    console.log(errorMessage);
     await thunkAPI.dispatch(setMessage(errorMessage));
     return thunkAPI.rejectWithValue();
   }
@@ -67,7 +80,7 @@ export const authSlice = createSlice({
       state.loading = false;
       state.isLogedIn = true;
       state.success = true;
-      // state.user = action.payload.data;
+      state.user = action.payload.data;
     },
     [login.rejected]: (state, action) => {
       state.loading = false;

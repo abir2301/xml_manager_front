@@ -8,9 +8,10 @@ import {
   colors,
   Drawer,
 } from "@mui/material";
+import { ToastContainer } from "react-toastify";
+
 import { ThemeProvider } from "@mui/material/styles";
 import { store } from "./store";
-import { Provider } from "react-redux";
 
 import theme from "./styles/theme";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
@@ -18,21 +19,34 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import Schemas from "./screens/schema";
 import AuthScreen from "./screens/auth";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { useDispatch, useSelector, Provider } from "react-redux";
 
 function App(props) {
-  const token = localStorage.getItem("token");
-  return (
-    <Provider store={store}>
+  const AppMain = () => {
+    const dispatch = useDispatch();
+    const authReducer = useSelector((state) => state.auth);
+    console.log(authReducer.isLogedIn);
+    return (
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<AuthScreen />}></Route>
-
           <Route
-            path="/schemas"
-            element={token !== null ? <Schemas /> : <AuthScreen />}
+            path="/"
+            element={
+              authReducer.isLogedIn || token ? <Schemas /> : <AuthScreen />
+            }
           />
         </Routes>
       </BrowserRouter>
+    );
+  };
+  const token = localStorage.getItem("token");
+  // console.log(authReducer.isLogedIn);
+  // useEffect(() => {}, [authReducer.isLogedIn]);
+
+  return (
+    <Provider store={store}>
+      <AppMain></AppMain>
     </Provider>
     // <>
     //

@@ -37,10 +37,11 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FnInstance from "../utulies/functions";
-import { dataStatic } from "../utulies/data";
 import Colors from "../utulies/colors";
 import "../styles/style.css";
 import { nodeType } from "../utulies/data";
+import { ToastContainer, toast } from "react-toastify";
+
 import {
   postElement,
   getFilesSchema,
@@ -115,6 +116,7 @@ export default function SchemasTreeView() {
       dispatch(deleteElement({ id: item._id }))
         .then((response) => {
           if (response && response.payload) {
+            dispatch(getFilesSchema());
             SuccessAlert({ message: response.payload.message });
           }
         })
@@ -204,9 +206,9 @@ export default function SchemasTreeView() {
             })
           )
             .then((response) => {
-              //  console.log(response);
               if (response && response.payload) {
                 if (response.payload.success) {
+                  dispatch(getFilesSchema());
                   SuccessAlert({ message: response.payload.message });
                 } else {
                   //   console.log(response.payload);
@@ -262,6 +264,7 @@ export default function SchemasTreeView() {
             console.log(response);
             if (response && response.payload) {
               if (response.payload.success) {
+                dispatch(getFilesSchema());
                 SuccessAlert({ message: response.payload.message });
               } else {
                 FailAlert({ message: response.payload.message });
@@ -285,7 +288,7 @@ export default function SchemasTreeView() {
             flexDirection: "row",
 
             backgroundColor: item.is_attribute ? Colors.purple : "#F5F9FF",
-            border: "2px solid #E4E7EC",
+            border: "2px solid #6c757d",
             height: "minHeight",
             display: "flex",
             gap: 2,
@@ -348,7 +351,7 @@ export default function SchemasTreeView() {
                     }
                   />
                   <ListItemText sx={{}} primary={item.name} />
-                  {item.childrens?.length >= 1 ? (
+                  {item.childrens?.length < 0 ? (
                     <></>
                   ) : (
                     <>
@@ -377,7 +380,9 @@ export default function SchemasTreeView() {
               padding: 1,
             }}
           >
-            {item.is_attribute ? (
+            {item.is_attribute ||
+            item.type === "string" ||
+            item.type === "number" ? (
               ""
             ) : (
               <AddIcon
@@ -501,7 +506,7 @@ export default function SchemasTreeView() {
               ?.filter((nestedItem) => nestedItem !== null)
               .map((nestedItem, nestedIndex) =>
                 nestedItem.is_attribute ? (
-                  <Box sx={{ margin: "12px 0 0 20px", borderWidth: 5 }}>
+                  <Box sx={{ margin: "30px 0 0 50px", borderWidth: 5 }}>
                     <ListItemComponent
                       key={nestedItem._id * nestedIndex}
                       item={nestedItem}
@@ -510,7 +515,7 @@ export default function SchemasTreeView() {
                     />
                   </Box>
                 ) : (
-                  <Box key={nestedItem._id} sx={{ margin: "12px 0 0 20px" }}>
+                  <Box key={nestedItem._id} sx={{ margin: "30px 0 0 50px" }}>
                     <ListItemComponent
                       key={nestedItem._id * nestedIndex}
                       item={nestedItem}
@@ -527,7 +532,7 @@ export default function SchemasTreeView() {
   };
 
   return (
-    <>
+    <Box sx={{ backgroundColor: "red" }}>
       <List
         sx={{ bgcolor: "background.paper" }}
         component="nav"
@@ -577,6 +582,6 @@ export default function SchemasTreeView() {
           </List>
         </Collapse>
       </List>
-    </>
+    </Box>
   );
 }

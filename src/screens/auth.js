@@ -25,7 +25,7 @@ import FormField from "../components/formField";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import Fn from "../utulies/functions";
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
@@ -40,9 +40,11 @@ const AuthScreen = () => {
     setErrors((prevState) => ({ ...prevState, [input]: error }));
   };
   const handleLogin = (e) => {
+    const fn = new Fn();
+
     let newErrors = {}; // Create a new error object
 
-    if (!email) {
+    if (!email || !fn.email(email)) {
       newErrors.email = "Please input email";
     }
     if (password.length < 8) {
@@ -69,20 +71,39 @@ const AuthScreen = () => {
     }
   };
   const handleRegsiter = (e) => {
+    const fn = new Fn();
+
     e.preventDefault();
     const data = {
       user_name: firstName + "_" + lastName,
       email: email,
       password: password,
     };
-    dispatch(register(data))
-      .then((response) => {
-        console.log(message);
-        console.log(response);
-      })
-      .catch((error) => {
-        console.log(message);
-      });
+    let newErrors = {}; // Create a new error object
+
+    if (!firstName || !lastName) {
+      newErrors.username = "user name could not be empty ";
+    }
+    if (!email || !fn.email(email)) {
+      newErrors.email = "invalid email";
+    }
+    if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    }
+
+    // Check if there are any errors
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors); // Update the errors state
+    } else {
+      dispatch(register(data))
+        .then((response) => {
+          // console.log(message);
+          console.log(response);
+        })
+        .catch((error) => {
+          console.log(message);
+        });
+    }
   };
 
   return (
@@ -196,6 +217,7 @@ const AuthScreen = () => {
                 id="password"
                 error={errors.password}
                 value={password}
+                isPassword={true}
                 onChange={(e) => setPassword(e.target.value)}
                 icon={<PasswordIcon></PasswordIcon>}
               ></FormField>
@@ -233,6 +255,7 @@ const AuthScreen = () => {
                   <FormField
                     label="last_name"
                     id="last_name"
+                    error={errors.username}
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     //  icon={<PersonIcon></PersonIcon>}
@@ -242,6 +265,7 @@ const AuthScreen = () => {
                   <FormField
                     label="first_name"
                     id="first_name"
+                    error={errors.username}
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     // icon={<PersonIcon></PersonIcon>}
@@ -251,6 +275,7 @@ const AuthScreen = () => {
               <FormField
                 label="email"
                 id="email"
+                error={errors.email}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 icon={<MailIcon></MailIcon>}
@@ -258,7 +283,9 @@ const AuthScreen = () => {
 
               <FormField
                 label="password"
+                error={errors.password}
                 id="password"
+                isPassword={true}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 icon={<PasswordIcon></PasswordIcon>}

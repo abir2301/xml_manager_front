@@ -15,6 +15,9 @@ import SuccessAlert from "./sweet_alert/success";
 import FailAlert from "./sweet_alert/fail";
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const SchemaList = ({ onChange }) => {
   const fileReducer = useSelector((state) => state.file);
 
@@ -34,6 +37,8 @@ const SchemaList = ({ onChange }) => {
         alignItems: "center",
       }}
     >
+      <ToastContainer />
+
       {fileReducer.loading ? (
         <>loading</>
       ) : (
@@ -79,25 +84,13 @@ const SchemaList = ({ onChange }) => {
                           })
                         )
                           .then((response) => {
-                            console.log(response.payload);
                             dispatch(getFilesSchema());
-
-                            if (response.payload && response.payload.data) {
-                              Swal.fire({
-                                title: "updated",
-                                icon: "success",
-                              });
-                              return true;
-                            }
-                            if (!response.payload.data) {
-                              throw new Error("error");
-                            }
                           })
                           .catch((error) => {
                             console.error("Error:", error);
-                            Swal.showValidationMessage(
-                              `Request failed: ${error}`
-                            );
+                            // Swal.showValidationMessage(
+                            //   `Request failed: ${error}`
+                            // );
                             return false;
                           });
                       },
@@ -105,23 +98,9 @@ const SchemaList = ({ onChange }) => {
                     }).then((result) => {
                       if (result.dismiss === Swal.DismissReason.cancel) {
                         // Handle delete logic here, e.g., call an API to delete the schema
-                        dispatch(deleteSchema(schema._id))
-                          .then(() => {
-                            dispatch(getFilesSchema());
-                          })
-                          .then(() => {
-                            Swal.fire({
-                              title: "Deleted",
-                              icon: "success",
-                            });
-                          })
-                          .catch((error) => {
-                            Swal.fire({
-                              title: "Error",
-                              text: `Failed to delete: ${error}`,
-                              icon: "error",
-                            });
-                          });
+                        dispatch(deleteSchema(schema._id)).then(() => {
+                          dispatch(getFilesSchema());
+                        });
                       }
                     });
 
@@ -220,23 +199,14 @@ const SchemaList = ({ onChange }) => {
               showCloseButton: true,
               showLoaderOnConfirm: true,
               preConfirm: (newTitle) => {
-                console.log(newTitle);
                 return dispatch(
                   postSchema({
                     data: { title: newTitle },
                   })
                 )
                   .then((response) => {
+                    dispatch(getFilesSchema());
                     console.log(response.payload);
-
-                    if (response && response.payload) {
-                      if (response.payload.success) {
-                        SuccessAlert({ message: response.payload.message });
-                      } else {
-                        //   console.log(response.payload);
-                        FailAlert({ message: response.payload.message });
-                      }
-                    }
                   })
                   .catch((error) => {
                     console.error("Error:", error);

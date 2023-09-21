@@ -3,7 +3,13 @@ const { create } = require("xmlbuilder2");
 
 const CryptoJS = require("crypto-js");
 
-class Fn {
+export default class Fn {
+  email = (input) => {
+    var validRegex =
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+
+    return input.match(validRegex);
+  };
   getParent(data, parentId) {
     for (const node of data) {
       const childrens = node.childrens;
@@ -72,5 +78,3 @@ class Fn {
   //   console.log(`Schema exported to ${filePath}`);
   // }
 }
-
-export default new Fn();

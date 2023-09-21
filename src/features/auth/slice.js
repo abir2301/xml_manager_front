@@ -9,16 +9,16 @@ export const login = createAsyncThunk("auth/login", async (data, thunkAPI) => {
     console.log(data);
     const result = await SchemaDataService.userLogin(data);
     console.log(result.data);
-    localStorage.setItem("token", result.data.token);
-
-    return result.data.data;
+    if (result.data.success) {
+      localStorage.setItem("token", result.data.token);
+      return result.data;
+    }
   } catch (error) {
     const errorMessage =
       (error.response && error.response.data && error.response.data.message) ||
       error.message ||
       error.toString();
 
-    // await thunkAPI.dispatch(setMessage(errorMessage));
     toast.error(errorMessage, {
       autoClose: 3000,
       pauseOnHover: false,
@@ -33,9 +33,10 @@ export const register = createAsyncThunk(
     try {
       const result = await SchemaDataService.userRegister(data);
       console.log(result);
-      localStorage.setItem("token", result.data.token);
-
-      return result.data.data;
+      if (result.data.success) {
+        localStorage.setItem("token", result.data.token);
+        return result.data;
+      }
     } catch (error) {
       const errorMessage =
         (error.response &&
@@ -43,15 +44,21 @@ export const register = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      console.log(errorMessage);
-      await thunkAPI.dispatch(setMessage(errorMessage));
+
+      toast.error(errorMessage, {
+        autoClose: 3000,
+        pauseOnHover: false,
+      });
+
       return thunkAPI.rejectWithValue();
     }
   }
 );
 export const logout = createAsyncThunk("auth/logout", async (thunkAPI) => {
   try {
-    localStorage.setItem("token", null);
+    console.log("slice_logout");
+
+    localStorage.removeItem("token");
   } catch (error) {
     const errorMessage =
       (error.response && error.response.data && error.response.data.message) ||

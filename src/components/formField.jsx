@@ -26,6 +26,7 @@ const FormField = (props) => {
       onChange={props.onChange}
       error={props.error ? true : false}
       helperText={props.error}
+      type={props.isPassword ? "password" : "text"}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start" x={{ fontSize: 36 }}>

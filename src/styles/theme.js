@@ -16,17 +16,17 @@ const theme = {
     borderWidth: 1,
     border: "black",
     bgcolor: Colors.purple,
+    color: "white",
   },
   LoginWithIcon: {
     fontSize: 30,
     marginX: 3,
-    //padding: 3,
 
-    //paddingX: 5,
-    color: "black",
+    color: Colors.blue,
     borderWidth: 1,
     borderRadius: 2,
   },
+  iconsStyle: { fontSize: 25, marginX: 3, color: Colors.purple },
 };
 
 export default theme;

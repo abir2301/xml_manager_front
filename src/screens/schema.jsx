@@ -9,7 +9,12 @@ import {
   Drawer,
   useMediaQuery,
   Box,
+  MenuItem,
+  Menu,
+  Modal,
 } from "@mui/material";
+import { ToastContainer, toast } from "react-toastify";
+
 import Colors from "../utulies/colors";
 import SchemasTreeView from "../components/schema_tree_view";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
@@ -20,19 +25,38 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileSchema from "../entities/Schema";
 import DownloadForOfflineIcon from "@mui/icons-material/DownloadForOffline";
-import {
-  postElement,
-  getFilesSchema,
-  deleteElement,
-  updateElement,
-  dowloadSchema,
-  setSelectedSchema,
-} from "../features/schemas/slice";
+import { dowloadSchema, setSelectedSchema } from "../features/schemas/slice";
+import { logout } from "../features/auth/slice";
 import { useDispatch, useSelector } from "react-redux";
-
+import { useNavigate } from "react-router-dom";
+import MenuIcon from "@mui/icons-material/Menu";
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import theme from "../styles/theme";
+import ProfileModal from "../components/profile_modal";
 const Schemas = (props) => {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [profileOpen, setProfileOpen] = React.useState(false);
+
+  const HandleOpenModal = () => {
+    setProfileOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setProfileOpen(false);
+    console.log(profileOpen);
+  };
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   const dispatch = useDispatch();
   const fileReducer = useSelector((state) => state.file);
+  const navigate = useNavigate();
   const downloadSchema = () => {
     const id = fileReducer.selectedSchema._id;
     dispatch(dowloadSchema({ id: id })).then((content) => {
@@ -49,6 +73,11 @@ const Schemas = (props) => {
       document.body.removeChild(a);
     });
   };
+  const logOut = () => {
+    dispatch(logout()).then(() => {
+      navigate("/");
+    });
+  };
   const onChange = (data) => {
     dispatch(setSelectedSchema({ schema: data }));
   };
@@ -59,6 +88,7 @@ const Schemas = (props) => {
         backgroundColor: "#F5F9FF",
       }}
     >
+      <ToastContainer />
       <Box
         sx={{
           pr: 2,
@@ -104,10 +134,41 @@ const Schemas = (props) => {
               />
             </Box>
 
-            <DownloadForOfflineIcon
-              onClick={downloadSchema}
-              style={{ fontSize: "40px", color: Colors.purple }}
+            <MenuIcon
+              onClick={handleClick}
+              style={{ fontSize: "25px", color: Colors.purple }}
             />
+            <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{
+                "aria-labelledby": "basic-button",
+              }}
+            >
+              <MenuItem onClick={handleClose}>
+                <FileCopyIcon sx={theme.iconsStyle}></FileCopyIcon>
+                xml_file
+              </MenuItem>
+              <MenuItem onClick={HandleOpenModal}>
+                <AccountCircleIcon sx={theme.iconsStyle}></AccountCircleIcon>
+                My account
+                <Modal
+                  open={profileOpen}
+                  // onClose={handleCloseModal}
+                  aria-labelledby="modal-modal-title"
+                  aria-describedby="modal-modal-description"
+                >
+                  {/* <ProfileModal /> */}
+                  <Button onClick={handleCloseModal}> close </Button>
+                </Modal>
+              </MenuItem>
+              <MenuItem onClick={logOut}>
+                <MeetingRoomIcon sx={theme.iconsStyle}></MeetingRoomIcon>
+                Logout
+              </MenuItem>
+            </Menu>
           </Toolbar>
         </AppBar>
 
@@ -165,8 +226,9 @@ const Schemas = (props) => {
               flex: 1,
               marginLeft: "16px",
               backgroundColor: Colors.white,
+              justifyContent: "space-between",
               borderRadius: "15px",
-              flexDirection: "column",
+              flexDirection: "row",
               padding: "10px",
               alignItems: "flex-start",
               height: "82vh", // Set a fixed height
@@ -174,6 +236,17 @@ const Schemas = (props) => {
             }}
           >
             <SchemasTreeView></SchemasTreeView>
+            <Button variant="outlined" onClick={downloadSchema}>
+              <Typography
+                sx={{
+                  fontSize: 15,
+                  color: Colors.purple,
+                  fontWeight: "bold",
+                }}
+              >
+                upload
+              </Typography>
+            </Button>
           </Box>
         </Box>
       </Box>

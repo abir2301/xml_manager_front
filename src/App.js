@@ -27,20 +27,22 @@ function App(props) {
     const dispatch = useDispatch();
     const authReducer = useSelector((state) => state.auth);
     console.log(authReducer.isLogedIn);
+    const token = localStorage.getItem("token");
+    console.log(token);
     return (
       <BrowserRouter>
         <Routes>
           <Route
             path="/"
             element={
-              authReducer.isLogedIn || token ? <Schemas /> : <AuthScreen />
+              token || authReducer.isLogedIn ? <Schemas /> : <AuthScreen />
             }
           />
         </Routes>
       </BrowserRouter>
     );
   };
-  const token = localStorage.getItem("token");
+
   // console.log(authReducer.isLogedIn);
   // useEffect(() => {}, [authReducer.isLogedIn]);
 

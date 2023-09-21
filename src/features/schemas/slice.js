@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import SchemaDataService from "../../services/schema.services";
 import FileSchema from "../../entities/Schema";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 export const getFilesSchema = createAsyncThunk(
   "file_schema/retrieve",
   async () => {
@@ -12,14 +15,54 @@ export const updateSchema = createAsyncThunk(
   "file_schema/update",
   async ({ data, id }) => {
     const res = await SchemaDataService.update(data, id);
-    return res.data;
+    if (res.data.success) {
+      console.log("show toaster ");
+      toast.success(res.data.message, {
+        autoClose: 3000,
+        pauseOnHover: false,
+        style: {
+          background: "green", // Change the background color
+          color: "white", // Change the text color
+        },
+      });
+      return res.data;
+    } else {
+      toast.error(res.data.message, {
+        autoClose: 3000,
+        pauseOnHover: false,
+        style: {
+          background: "red", // Change the background color
+          color: "white", // Change the text color
+        },
+      });
+    }
   }
 );
 export const deleteSchema = createAsyncThunk(
   "file_schema/delete",
   async (id) => {
     const res = await SchemaDataService.delete(id);
-    return res.data;
+    if (res.data.success) {
+      console.log("show toaster ");
+      toast.success(res.data.message, {
+        autoClose: 3000,
+        pauseOnHover: false,
+        style: {
+          background: "green", // Change the background color
+          color: "white", // Change the text color
+        },
+      });
+      return res.data;
+    } else {
+      toast.error(res.data.message, {
+        autoClose: 3000,
+        pauseOnHover: false,
+        style: {
+          background: "red", // Change the background color
+          color: "white", // Change the text color
+        },
+      });
+    }
   }
 );
 export const postSchema = createAsyncThunk(
@@ -27,10 +70,28 @@ export const postSchema = createAsyncThunk(
   async ({ data }, { rejectWithValue }) => {
     try {
       const res = await SchemaDataService.create(data);
-      console.log(res.data);
-      return res.data;
+      if (res.data.success) {
+        console.log("show toaster ");
+        toast.success(res.data.message, {
+          autoClose: 3000,
+          pauseOnHover: false,
+          style: {
+            background: "green", // Change the background color
+            color: "white", // Change the text color
+          },
+        });
+        return res.data;
+      } else {
+        toast.error(res.data.message, {
+          style: {
+            background: "red", // Change the background color
+            color: "white", // Change the text color
+          },
+          autoClose: 3000,
+          pauseOnHover: false,
+        });
+      }
     } catch (error) {
-      // If the error response has a message, it will be stored in error.response.data.message
       return rejectWithValue(error.response.data || "An error occurred");
     }
   }

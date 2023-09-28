@@ -32,7 +32,6 @@ const AuthScreen = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const dispatch = useDispatch();
   const [errors, setErrors] = React.useState({});
   const message = useSelector((state) => state.message);

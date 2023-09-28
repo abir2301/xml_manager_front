@@ -21,6 +21,7 @@ const FormField = (props) => {
       label={props.label}
       variant="outlined"
       margin="normal"
+      defaultValue={props.defaultValue}
       required
       value={props.value}
       onChange={props.onChange}

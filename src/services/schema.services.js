@@ -36,5 +36,11 @@ class SchemaDataService {
   userRegister(data) {
     return http.post(`/user/register`, data);
   }
+  userProfile() {
+    return http.get(`/user`);
+  }
+  updateProfile(data) {
+    return http.put(`/user`, data);
+  }
 }
 export default new SchemaDataService();

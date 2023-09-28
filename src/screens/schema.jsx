@@ -4,29 +4,25 @@ import {
   AppBar,
   Button,
   Toolbar,
-  Container,
-  colors,
-  Drawer,
-  useMediaQuery,
   Box,
+  Grid,
   MenuItem,
   Menu,
   Modal,
 } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
-
+import MailIcon from "@mui/icons-material/Mail";
+import ProfileModal from "../components/profile_modal";
 import Colors from "../utulies/colors";
 import SchemasTreeView from "../components/schema_tree_view";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SchemaList from "../components/schema_list";
-import { useState, useEffect } from "react";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FileSchema from "../entities/Schema";
-import DownloadForOfflineIcon from "@mui/icons-material/DownloadForOffline";
+import { useEffect } from "react";
+
 import { dowloadSchema, setSelectedSchema } from "../features/schemas/slice";
-import { logout } from "../features/auth/slice";
+import { authSlice, logout } from "../features/auth/slice";
+import { getProfile } from "../features/auth/slice";
+
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -34,19 +30,10 @@ import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import theme from "../styles/theme";
-import ProfileModal from "../components/profile_modal";
 const Schemas = (props) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [profileOpen, setProfileOpen] = React.useState(false);
 
-  const HandleOpenModal = () => {
-    setProfileOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setProfileOpen(false);
-    console.log(profileOpen);
-  };
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -56,6 +43,7 @@ const Schemas = (props) => {
   };
   const dispatch = useDispatch();
   const fileReducer = useSelector((state) => state.file);
+  const authReducer = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const downloadSchema = () => {
     const id = fileReducer.selectedSchema._id;
@@ -81,7 +69,9 @@ const Schemas = (props) => {
   const onChange = (data) => {
     dispatch(setSelectedSchema({ schema: data }));
   };
-  useEffect(() => {}, []);
+  useEffect(() => {
+    dispatch(getProfile());
+  }, []);
   return (
     <Box
       sx={{
@@ -151,23 +141,123 @@ const Schemas = (props) => {
                 <FileCopyIcon sx={theme.iconsStyle}></FileCopyIcon>
                 xml_file
               </MenuItem>
-              <MenuItem onClick={HandleOpenModal}>
+              <MenuItem onClick={() => setProfileOpen(true)}>
                 <AccountCircleIcon sx={theme.iconsStyle}></AccountCircleIcon>
                 My account
-                <Modal
-                  open={profileOpen}
-                  // onClose={handleCloseModal}
-                  aria-labelledby="modal-modal-title"
-                  aria-describedby="modal-modal-description"
-                >
-                  {/* <ProfileModal /> */}
-                  <Button onClick={handleCloseModal}> close </Button>
-                </Modal>
               </MenuItem>
               <MenuItem onClick={logOut}>
                 <MeetingRoomIcon sx={theme.iconsStyle}></MeetingRoomIcon>
                 Logout
               </MenuItem>
+              {/* <Modal
+                open={profileOpen}
+                onClose={() => setProfileOpen(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Box
+                  sx={{
+                    backgroundColor: "white",
+                    flexDirection: "column",
+                    border: "1px",
+                    borderRadius: 5,
+                    boxShadow: 24,
+                    p: 5,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: "200px",
+                  }}
+                >
+                  <AccountCircleIcon
+                    style={{
+                      fontSize: "50px",
+                      color: Colors.purple,
+                      margin: 10,
+                    }}
+                  ></AccountCircleIcon>
+                  <Typography
+                    id="modal-modal-title"
+                    variant="h6"
+                    component="h2"
+                  >
+                    User Profile
+                  </Typography>
+                  <Box>
+                    <FormField
+                      label="email"
+                      defaultValue={authReducer.loading ? " " : user.email}
+                      // onFocus={() => handleError(null, "email")}
+                      id="email"
+                      // value={email}
+                      //onChange={(e) => setEmail(e.target.value)}
+                      icon={<MailIcon></MailIcon>}
+                      // error={errors.email}
+                    ></FormField>
+                    <Grid
+                      container
+                      alignItems="center"
+                      justifyContent="space-around"
+                      gap="10px"
+                    >
+                      <Grid item>
+                        <FormField
+                          label="last_name"
+                          defaultValue={
+                            authReducer.loading
+                              ? " "
+                              : user.user_name.split("_")[1]
+                          }
+                          id="last_name"
+                          //   error={errors.username}
+                          //  value={lastName}
+                          // onChange={(e) => setLastName(e.target.value)}
+                          //  icon={<PersonIcon></PersonIcon>}
+                        ></FormField>
+                      </Grid>
+                      <Grid item>
+                        <FormField
+                          label="first_name"
+                          id="first_name"
+                          defaultValue={
+                            authReducer.loading
+                              ? " "
+                              : user.user_name.split("_")[0]
+                          }
+                          //    error={errors.username}
+                          //    value={firstName}
+                          //   onChange={(e) => setFirstName(e.target.value)}
+                          // icon={<PersonIcon></PersonIcon>}
+                        ></FormField>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  <Box
+                    style={{
+                      marginTop: "20px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      display: "flex",
+                    }}
+                  >
+                    <Button
+                      sx={theme.buttonStyle}
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      Close
+                    </Button>
+                    <Button sx={theme.buttonStyle}>Update</Button>
+                  </Box>
+                </Box>
+              </Modal> */}
+              <ProfileModal
+                isOpen={profileOpen}
+                onClose={() => setProfileOpen(false)}
+              />
             </Menu>
           </Toolbar>
         </AppBar>
@@ -244,7 +334,7 @@ const Schemas = (props) => {
                   fontWeight: "bold",
                 }}
               >
-                upload
+                Export
               </Typography>
             </Button>
           </Box>

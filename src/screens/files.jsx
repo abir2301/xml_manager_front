@@ -11,16 +11,19 @@ import {
   Modal,
 } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
-
+import MailIcon from "@mui/icons-material/Mail";
 import ProfileModal from "../components/profile_modal";
 import Colors from "../utulies/colors";
 import SchemasTreeView from "../components/schema_tree_view";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SchemaList from "../components/schema_list";
+import FileList from "../components/files_list";
 import { useEffect } from "react";
-
+import FileTreeView from "../components/file_tree_view";
 import { dowloadSchema, setSelectedSchema } from "../features/schemas/slice";
-import { authSlice, logout } from "../features/auth/slice";
+import { setSelectedFile } from "../features/xml_files/slice";
+
+import { logout } from "../features/auth/slice";
 import { getProfile } from "../features/auth/slice";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -30,7 +33,7 @@ import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import theme from "../styles/theme";
-const Schemas = (props) => {
+const FilesScreen = (props) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [profileOpen, setProfileOpen] = React.useState(false);
 
@@ -44,6 +47,7 @@ const Schemas = (props) => {
   const dispatch = useDispatch();
   const fileReducer = useSelector((state) => state.file);
   const authReducer = useSelector((state) => state.auth);
+  const xmlReducer = useSelector((state) => state.xml);
   const navigate = useNavigate();
   const downloadSchema = () => {
     const id = fileReducer.selectedSchema._id;
@@ -67,11 +71,31 @@ const Schemas = (props) => {
     });
   };
   const onChange = (data) => {
-    dispatch(setSelectedSchema({ schema: data }));
+    dispatch(setSelectedFile({ schema: data }));
   };
   useEffect(() => {
     dispatch(getProfile());
   }, []);
+  const renderNode = (node) => {
+    if (node.childrens && node.childrens.length > 0) {
+      return (
+        <div key={node._id}>
+          <div>{`<${node.name}>`}</div>
+          <div style={{ marginLeft: "20px" }}>
+            {node.childrens.map((child) => renderNode(child))}
+          </div>
+          <div>{`</${node.name}>`}</div>
+        </div>
+      );
+    } else {
+      return (
+        <div key={node._id}>
+          {`<${node.name}>${node.value || ""}</${node.name}>`}
+        </div>
+      );
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -131,7 +155,7 @@ const Schemas = (props) => {
                   paddingLeft: "20px",
                 }}
               >
-                schemas
+                Xml_files
               </Typography>
             </Box>
 
@@ -150,11 +174,11 @@ const Schemas = (props) => {
             >
               <MenuItem
                 onClick={() => {
-                  navigate("/files");
+                  navigate("/");
                 }}
               >
                 <FileCopyIcon sx={theme.iconsStyle}></FileCopyIcon>
-                xml_file
+                schemas
               </MenuItem>
               <MenuItem onClick={() => setProfileOpen(true)}>
                 <AccountCircleIcon sx={theme.iconsStyle}></AccountCircleIcon>
@@ -164,111 +188,7 @@ const Schemas = (props) => {
                 <MeetingRoomIcon sx={theme.iconsStyle}></MeetingRoomIcon>
                 Logout
               </MenuItem>
-              {/* <Modal
-                open={profileOpen}
-                onClose={() => setProfileOpen(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Box
-                  sx={{
-                    backgroundColor: "white",
-                    flexDirection: "column",
-                    border: "1px",
-                    borderRadius: 5,
-                    boxShadow: 24,
-                    p: 5,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    minHeight: "200px",
-                  }}
-                >
-                  <AccountCircleIcon
-                    style={{
-                      fontSize: "50px",
-                      color: Colors.purple,
-                      margin: 10,
-                    }}
-                  ></AccountCircleIcon>
-                  <Typography
-                    id="modal-modal-title"
-                    variant="h6"
-                    component="h2"
-                  >
-                    User Profile
-                  </Typography>
-                  <Box>
-                    <FormField
-                      label="email"
-                      defaultValue={authReducer.loading ? " " : user.email}
-                      // onFocus={() => handleError(null, "email")}
-                      id="email"
-                      // value={email}
-                      //onChange={(e) => setEmail(e.target.value)}
-                      icon={<MailIcon></MailIcon>}
-                      // error={errors.email}
-                    ></FormField>
-                    <Grid
-                      container
-                      alignItems="center"
-                      justifyContent="space-around"
-                      gap="10px"
-                    >
-                      <Grid item>
-                        <FormField
-                          label="last_name"
-                          defaultValue={
-                            authReducer.loading
-                              ? " "
-                              : user.user_name.split("_")[1]
-                          }
-                          id="last_name"
-                          //   error={errors.username}
-                          //  value={lastName}
-                          // onChange={(e) => setLastName(e.target.value)}
-                          //  icon={<PersonIcon></PersonIcon>}
-                        ></FormField>
-                      </Grid>
-                      <Grid item>
-                        <FormField
-                          label="first_name"
-                          id="first_name"
-                          defaultValue={
-                            authReducer.loading
-                              ? " "
-                              : user.user_name.split("_")[0]
-                          }
-                          //    error={errors.username}
-                          //    value={firstName}
-                          //   onChange={(e) => setFirstName(e.target.value)}
-                          // icon={<PersonIcon></PersonIcon>}
-                        ></FormField>
-                      </Grid>
-                    </Grid>
-                  </Box>
 
-                  <Box
-                    style={{
-                      marginTop: "20px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      display: "flex",
-                    }}
-                  >
-                    <Button
-                      sx={theme.buttonStyle}
-                      onClick={() => setProfileOpen(false)}
-                    >
-                      Close
-                    </Button>
-                    <Button sx={theme.buttonStyle}>Update</Button>
-                  </Box>
-                </Box>
-              </Modal> */}
               <ProfileModal
                 isOpen={profileOpen}
                 onClose={() => setProfileOpen(false)}
@@ -311,7 +231,7 @@ const Schemas = (props) => {
               margin: "10px",
             }}
           >
-            <SchemaList onChange={onChange} />
+            <FileList onChange={onChange} />
           </Box>
 
           <Box
@@ -340,7 +260,10 @@ const Schemas = (props) => {
               overflowY: "auto", // Enable vertical scrolling when content exceeds the height
             }}
           >
-            <SchemasTreeView></SchemasTreeView>
+            <Box>
+              <FileTreeView></FileTreeView>
+            </Box>
+
             <Button variant="outlined" onClick={downloadSchema}>
               <Typography
                 sx={{
@@ -349,7 +272,7 @@ const Schemas = (props) => {
                   fontWeight: "bold",
                 }}
               >
-                Export
+                Export File
               </Typography>
             </Button>
           </Box>
@@ -358,4 +281,4 @@ const Schemas = (props) => {
     </Box>
   );
 };
-export default Schemas;
+export default FilesScreen;

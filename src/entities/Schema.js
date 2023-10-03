@@ -11,6 +11,7 @@ export default class FileSchema {
         parent_id: null,
         schema_id: null,
         is_attribute: false,
+        value: null,
         lavelH: 0,
         __v: 0,
         childrens: [],

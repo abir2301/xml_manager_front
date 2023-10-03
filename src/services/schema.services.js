@@ -1,5 +1,6 @@
 import http from "../utulies/http";
 class SchemaDataService {
+  //shemas
   getAll() {
     return http.get(`/file_schema`);
   }
@@ -15,6 +16,13 @@ class SchemaDataService {
   delete(id) {
     return http.delete(`/file_schema/${id}`);
   }
+  exportSchema(id) {
+    return http.post(`/file_schema/${id}`);
+  }
+  downloadSchema() {
+    return http.get(`/xsdFiles/schema.xsd`);
+  }
+  //xml_elements
   postElement(data, id) {
     return http.post(`/xml_element/${id}`, data);
   }
@@ -24,12 +32,7 @@ class SchemaDataService {
   updateElement(data, id) {
     return http.put(`/xml_element/${id}`, data);
   }
-  exportSchema(id) {
-    return http.post(`/file_schema/${id}`);
-  }
-  downloadSchema() {
-    return http.get(`/xsdFiles/schema.xsd`);
-  }
+  //auth
   userLogin(data) {
     return http.post(`/user/login`, data);
   }
@@ -41,6 +44,22 @@ class SchemaDataService {
   }
   updateProfile(data) {
     return http.put(`/user`, data);
+  }
+  // xml_files
+  getAllFiles() {
+    return http.get(`/file`);
+  }
+  getFile(id) {
+    return http.get(`/file/${id}`);
+  }
+  createFile(data, id) {
+    return http.post(`/file/${id}`, data);
+  }
+  updateFile(data, id) {
+    return http.put(`/file/${id}`, data);
+  }
+  deleteFile(id) {
+    return http.delete(`/file/${id}`);
   }
 }
 export default new SchemaDataService();

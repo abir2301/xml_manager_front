@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import SvgIcon from "@mui/material/SvgIcon";
 import { alpha, styled } from "@mui/material/styles";
 import TreeView from "@mui/lab/TreeView";
+import CheckIcon from "@mui/icons-material/Check";
+
 import {
   Box,
   Button,
@@ -532,16 +534,16 @@ export default function SchemasTreeView() {
             <TextField
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 3, // Adjust the border radius as needed
+                  borderRadius: 2, // Adjust the border radius as needed
                   border: "2px #8E8E8E", // Add a thicker border and adjust the color
                   "& fieldset": {
-                    borderColor: "#000", // Border color when not focused
+                    borderColor: "#6c757d", // Border color when not focused
                   },
                   "&:hover fieldset": {
-                    borderColor: "#000", // Border color on hover
+                    borderColor: "#6c757d", // Border color on hover
                   },
                   "&.Mui-focused fieldset": {
-                    borderColor: "#000", // Border color when focused
+                    borderColor: "#6c757d", // Border color when focused
                   },
                 },
               }}
@@ -591,16 +593,20 @@ export default function SchemasTreeView() {
             {/* <Button variant="contained" color="primary" onClick={handleAddNode}>
               Add Node
             </Button> */}
-            <Button onClick={handleAddNode} color="primary" variant="contained">
-              Add Node
+            <Button
+              onClick={handleAddNode}
+              sx={theme.formButtons}
+              variant="contained"
+            >
+              <CheckIcon sx={[theme.formIcons, { color: "green" }]}></CheckIcon>
             </Button>
             <Button
-              sx={{ height: 60 }}
+              sx={[theme.formButtons, { height: 60 }]}
               onClick={handleDeleteClick}
               variant="contained"
             >
               <DeleteIcon
-                sx={{ color: "tomato", fontSize: 40, paddingX: 1, marginY: 2 }}
+                sx={[{ color: "tomato" }, theme.formIcons]}
               ></DeleteIcon>
             </Button>
           </Box>

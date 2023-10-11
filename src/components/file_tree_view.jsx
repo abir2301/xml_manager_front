@@ -106,7 +106,7 @@ export default function FileTreeView() {
           id: node._id,
         })
       );
-      // dispatch(getFiles());
+      dispatch(getFiles());
       setValue("");
       setOpen(false);
     }
@@ -192,8 +192,10 @@ export default function FileTreeView() {
               primary={
                 <Typography sx={theme.nodeNameStyle}>
                   {`<${node.name}   `}
-                  {node.attribute._id
-                    ? ` ${node.attribute.name}=${node.attribute.value}`
+                  {node.attribute
+                    ? node.attribute._id
+                      ? ` ${node.attribute.name}=${node.attribute.value}`
+                      : ""
                     : ""}
                   {`>`}
                 </Typography>
@@ -286,7 +288,7 @@ export default function FileTreeView() {
         component="nav"
         aria-labelledby="nested-list-subheader"
       >
-        {xmlReducer.selectedfile.data.map((node) => (
+        {xmlReducer?.selectedfile?.data.map((node) => (
           <div key={node._id} style={{ marginLeft: "20px" }}>
             {renderNode(node)}
           </div>

@@ -76,30 +76,31 @@ const FilesScreen = (props) => {
   useEffect(() => {
     dispatch(getProfile());
   }, []);
-  const renderNode = (node) => {
-    if (node.childrens && node.childrens.length > 0) {
-      return (
-        <div key={node._id}>
-          <div>{`<${node.name}>`}</div>
-          <div style={{ marginLeft: "20px" }}>
-            {node.childrens.map((child) => renderNode(child))}
-          </div>
-          <div>{`</${node.name}>`}</div>
-        </div>
-      );
-    } else {
-      return (
-        <div key={node._id}>
-          {`<${node.name}>${node.value || ""}</${node.name}>`}
-        </div>
-      );
-    }
-  };
+  // const renderNode = (node) => {
+  //   if (node.childrens && node.childrens.length > 0) {
+  //     return (
+  //       <div key={node._id}>
+  //         <div>{`<${node.name}>`}</div>
+  //         <div style={{ marginLeft: "20px" }}>
+  //           {node.childrens.map((child) => renderNode(child))}
+  //         </div>
+  //         <div>{`</${node.name}>`}</div>
+  //       </div>
+  //     );
+  //   } else {
+  //     return (
+  //       <div key={node._id}>
+  //         {`<${node.name}>${node.value || ""}</${node.name}>`}
+  //       </div>
+  //     );
+  //   }
+  // };
 
   return (
     <Box
       sx={{
         backgroundColor: "#F5F9FF",
+        marginTop: "0px",
       }}
     >
       <ToastContainer />
@@ -141,7 +142,7 @@ const FilesScreen = (props) => {
                   paddingLeft: "20px",
                 }}
               >
-                Xml_Manager
+                XMLCraft
               </Typography>
               <NavigateNextIcon
                 style={{ fontSize: "30px", color: Colors.purple }}
@@ -149,13 +150,14 @@ const FilesScreen = (props) => {
               <Typography
                 sx={{
                   marginLeft: 0,
-                  fontSize: 20,
+                  fontSize: 30,
                   color: "black",
                   paddingRight: "20px",
+                  fontWeight: "bold",
                   paddingLeft: "20px",
                 }}
               >
-                Xml_files
+                XmlFiles
               </Typography>
             </Box>
 
@@ -223,7 +225,7 @@ const FilesScreen = (props) => {
                 backgroundColor: "#506ECF",
               },
 
-              height: "82vh",
+              height: "86vh",
               backgroundColor: Colors.white,
               padding: 2,
               borderRadius: "15px",
@@ -256,13 +258,12 @@ const FilesScreen = (props) => {
               flexDirection: "row",
               padding: "10px",
               alignItems: "flex-start",
-              height: "82vh", // Set a fixed height
+              margin: "10px",
+              height: "86vh", // Set a fixed height
               overflowY: "auto", // Enable vertical scrolling when content exceeds the height
             }}
           >
-            <Box>
-              <FileTreeView></FileTreeView>
-            </Box>
+            <FileTreeView></FileTreeView>
 
             <Button variant="outlined" onClick={exportFile}>
               <Typography

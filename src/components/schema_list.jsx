@@ -124,7 +124,7 @@ const SchemaList = ({ onChange }) => {
                     sx={{
                       fontSize: 16,
                       color: "#1E1E1E",
-                      fontWeight: "normal",
+                      fontWeight: "bold",
                     }}
                   >
                     {schema.title}
@@ -220,8 +220,8 @@ const SchemaList = ({ onChange }) => {
           <Typography
             sx={{
               fontSize: 16,
-              color: "#1E1E1E",
-              fontWeight: "normal",
+              color: "white",
+              fontWeight: "bold",
             }}
           >
             {"create Schema"}

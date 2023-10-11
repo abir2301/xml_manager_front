@@ -19,7 +19,7 @@ import {
   deleteFile,
   postFile,
 } from "../features/xml_files/slice";
-
+import theme from "../styles/theme";
 import SuccessAlert from "./sweet_alert/success";
 import FailAlert from "./sweet_alert/fail";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,6 +28,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "./loader";
 const FileList = ({ onChange }) => {
+  const MySwal = withReactContent(Swal);
+
   const xmlReducer = useSelector((state) => state.xml);
   const FileReducer = useSelector((state) => state.file);
 
@@ -59,8 +61,12 @@ const FileList = ({ onChange }) => {
                 console.log(event.detail);
                 switch (event.detail) {
                   case 2: {
-                    Swal.fire({
-                      title: "Manage file",
+                    MySwal.fire({
+                      title: (
+                        <Typography style={theme.swalTitle}>
+                          Manage File
+                        </Typography>
+                      ),
                       customClass: {
                         title: {
                           color: Colors.purple,
@@ -117,23 +123,11 @@ const FileList = ({ onChange }) => {
                   }
                 }
               };
-              const handleDoubleClick = () => {
-                console.log("update");
-                // Rest of your double-click logic here
-              };
+
               return (
                 <Button
                   className="schemaButton"
                   onClick={handleClick}
-                  //onDoubleClick={handleClick}
-                  // onClick={() => onChange(schema)}
-                  //  onDoubleClick={handleDoubleClick}
-                  // onDoubleClick={
-                  //   handleDoubleClick
-                  //   //   () => {
-                  //   //   console.log("update");
-
-                  // }
                   size="large"
                   key={schema._id}
                   variant="outlined"
@@ -155,7 +149,7 @@ const FileList = ({ onChange }) => {
                     sx={{
                       fontSize: 16,
                       color: "#1E1E1E",
-                      fontWeight: "normal",
+                      fontWeight: "bold",
                     }}
                   >
                     {schema.title}
@@ -203,8 +197,12 @@ const FileList = ({ onChange }) => {
       <input id="fileTitle" class="swal2-input" placeholder="Enter File Title">
     </div>
   `;
-              Swal.fire({
-                title: "Manage File",
+              MySwal.fire({
+                title: (
+                  <Typography style={theme.swalTitle}>
+                    Create new File{" "}
+                  </Typography>
+                ),
                 customClass: {
                   title: {
                     color: Colors.purple,
@@ -265,12 +263,12 @@ const FileList = ({ onChange }) => {
           <Typography
             sx={{
               fontSize: 16,
-              color: "#1E1E1E",
+              color: "white",
 
-              fontWeight: "normal",
+              fontWeight: "bold",
             }}
           >
-            {"New File"}
+            {"Create File"}
           </Typography>
         </Button>
       </Box>

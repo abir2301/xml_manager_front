@@ -115,7 +115,7 @@ const Schemas = (props) => {
                   paddingLeft: "20px",
                 }}
               >
-                Xml_Manager
+                XMLCraft
               </Typography>
               <NavigateNextIcon
                 style={{ fontSize: "30px", color: Colors.purple }}
@@ -123,8 +123,9 @@ const Schemas = (props) => {
               <Typography
                 sx={{
                   marginLeft: 0,
-                  fontSize: 20,
+                  fontSize: 30,
                   color: "black",
+                  fontWeight: "bold",
                   paddingRight: "20px",
                   paddingLeft: "20px",
                 }}
@@ -279,7 +280,7 @@ const Schemas = (props) => {
           sx={{
             display: "flex",
             flex: 1,
-            height: "100%",
+            height: "110%",
             width: "100%",
             position: "sticky",
             backgroundColor: Colors.bg,
@@ -301,12 +302,12 @@ const Schemas = (props) => {
                 backgroundColor: "#506ECF",
               },
 
-              height: "82vh",
+              height: "86vh",
               backgroundColor: Colors.white,
               padding: 2,
               borderRadius: "15px",
-              overflowY: "auto",
               margin: "10px",
+              overflowY: "auto",
             }}
           >
             <SchemaList onChange={onChange} />
@@ -327,6 +328,7 @@ const Schemas = (props) => {
               },
               display: "flex",
               flex: 1,
+              margin: "10px",
               marginLeft: "16px",
               backgroundColor: Colors.white,
               justifyContent: "space-between",
@@ -334,7 +336,7 @@ const Schemas = (props) => {
               flexDirection: "row",
               padding: "10px",
               alignItems: "flex-start",
-              height: "82vh", // Set a fixed height
+              height: "86vh", // Set a fixed height
               overflowY: "auto", // Enable vertical scrolling when content exceeds the height
             }}
           >
@@ -347,7 +349,7 @@ const Schemas = (props) => {
                   fontWeight: "bold",
                 }}
               >
-                Export
+                Export schema
               </Typography>
             </Button>
           </Box>

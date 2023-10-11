@@ -33,7 +33,7 @@ import theme from "../styles/theme";
 const Schemas = (props) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [profileOpen, setProfileOpen] = React.useState(false);
-
+  const navigate = useNavigate();
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -43,13 +43,12 @@ const Schemas = (props) => {
   };
   const dispatch = useDispatch();
   const fileReducer = useSelector((state) => state.file);
-  const authReducer = useSelector((state) => state.auth);
-  const navigate = useNavigate();
+
   const downloadSchema = () => {
     const id = fileReducer.selectedSchema._id;
     dispatch(dowloadSchema({ id: id })).then((content) => {
       content = content.payload;
-      const fileName = "schema.xsd";
+      const fileName = "schema1.xsd";
       const blob = new Blob([content], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -76,6 +75,7 @@ const Schemas = (props) => {
     <Box
       sx={{
         backgroundColor: "#F5F9FF",
+        paddingTop: "15px",
       }}
     >
       <ToastContainer />
@@ -88,10 +88,8 @@ const Schemas = (props) => {
         <AppBar
           sx={{
             borderRadius: "25px",
-            margin: "15px",
             position: "sticky",
             padding: "10px",
-            //  zIndex: theme.zIndex.drawer + 2,
             bgcolor: Colors.white,
           }}
         >

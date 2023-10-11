@@ -5,6 +5,7 @@ import Colors from "../utulies/colors";
 import { useState, useEffect, componentDidMount } from "react";
 import FolderIcon from "@mui/icons-material/Folder";
 import AddIcon from "@mui/icons-material/Add";
+import withReactContent from "sweetalert2-react-content";
 
 import {
   getFilesSchema,
@@ -25,7 +26,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import Loader from "./loader";
 const FileList = ({ onChange }) => {
   const xmlReducer = useSelector((state) => state.xml);
   const FileReducer = useSelector((state) => state.file);
@@ -34,7 +35,6 @@ const FileList = ({ onChange }) => {
 
   useEffect(() => {
     dispatch(getFiles());
-    dispatch(getFilesSchema());
   }, [dispatch]);
 
   return (
@@ -50,7 +50,7 @@ const FileList = ({ onChange }) => {
       <ToastContainer />
 
       {xmlReducer.loading ? (
-        <>loading</>
+        <Loader></Loader>
       ) : (
         <>
           {xmlReducer?.files?.length >= 0 ? (
@@ -58,10 +58,6 @@ const FileList = ({ onChange }) => {
               const handleClick = (event) => {
                 console.log(event.detail);
                 switch (event.detail) {
-                  case 1: {
-                    onChange(schema);
-                    break;
-                  }
                   case 2: {
                     Swal.fire({
                       title: "Manage file",
@@ -113,7 +109,9 @@ const FileList = ({ onChange }) => {
 
                     break;
                   }
-
+                  case 1: {
+                    onChange(schema);
+                  }
                   default: {
                     break;
                   }
@@ -186,9 +184,10 @@ const FileList = ({ onChange }) => {
       >
         <Button
           onClick={() => {
-            console.log(FileReducer.fileSchemas);
-            const swalContent = document.createElement("div");
-            swalContent.innerHTML = `
+            dispatch(getFilesSchema()).then(() => {
+              console.log(FileReducer.fileSchemas);
+              const swalContent = document.createElement("div");
+              swalContent.innerHTML = `
     <div>
       <label for="schemaSelect">Select a Schema:</label>
       <select id="schemaSelect" class="swal2-select">
@@ -204,48 +203,49 @@ const FileList = ({ onChange }) => {
       <input id="fileTitle" class="swal2-input" placeholder="Enter File Title">
     </div>
   `;
-            Swal.fire({
-              title: "Manage File",
-              customClass: {
-                title: {
-                  color: Colors.purple,
+              Swal.fire({
+                title: "Manage File",
+                customClass: {
+                  title: {
+                    color: Colors.purple,
+                  },
                 },
-              },
 
-              html: swalContent,
-              showCancelButton: true,
-              confirmButtonText: "Create",
-              cancelButtonText: "Cancel",
-              showCloseButton: true,
-              showLoaderOnConfirm: true,
-              preConfirm: () => {
-                const selectedSchemaName =
-                  document.getElementById("schemaSelect").value;
-                const fileTitle = document.getElementById("fileTitle").value;
-                console.log(fileTitle, selectedSchemaName);
-                if (fileTitle && selectedSchemaName) {
-                  return dispatch(
-                    postFile({
-                      data: { title: fileTitle },
-                      id: selectedSchemaName,
-                    })
-                  )
-                    .then((response) => {
-                      dispatch(getFiles());
-                      console.log(response);
-                    })
-                    .catch((error) => {
-                      console.error("Error:", error);
-                      Swal.showValidationMessage(`Request failed: ${error}`);
-                      return false;
-                    });
-                } else {
-                  Swal.showValidationMessage(
-                    "Please select a schema and enter a file title"
-                  );
-                  return false;
-                }
-              },
+                html: swalContent,
+                showCancelButton: true,
+                confirmButtonText: "Create",
+                cancelButtonText: "Cancel",
+                showCloseButton: true,
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                  const selectedSchemaName =
+                    document.getElementById("schemaSelect").value;
+                  const fileTitle = document.getElementById("fileTitle").value;
+                  console.log(fileTitle, selectedSchemaName);
+                  if (fileTitle && selectedSchemaName) {
+                    return dispatch(
+                      postFile({
+                        data: { title: fileTitle },
+                        id: selectedSchemaName,
+                      })
+                    )
+                      .then((response) => {
+                        dispatch(getFiles());
+                        console.log(response);
+                      })
+                      .catch((error) => {
+                        console.error("Error:", error);
+                        Swal.showValidationMessage(`Request failed: ${error}`);
+                        return false;
+                      });
+                  } else {
+                    Swal.showValidationMessage(
+                      "Please select a schema and enter a file title"
+                    );
+                    return false;
+                  }
+                },
+              });
             });
           }}
           size="large"

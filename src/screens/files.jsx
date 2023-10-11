@@ -20,8 +20,8 @@ import SchemaList from "../components/schema_list";
 import FileList from "../components/files_list";
 import { useEffect } from "react";
 import FileTreeView from "../components/file_tree_view";
-import { dowloadSchema, setSelectedSchema } from "../features/schemas/slice";
-import { setSelectedFile } from "../features/xml_files/slice";
+import { downloadSchema, setSelectedSchema } from "../features/schemas/slice";
+import { setSelectedFile, downloadFile } from "../features/xml_files/slice";
 
 import { logout } from "../features/auth/slice";
 import { getProfile } from "../features/auth/slice";
@@ -49,11 +49,11 @@ const FilesScreen = (props) => {
   const authReducer = useSelector((state) => state.auth);
   const xmlReducer = useSelector((state) => state.xml);
   const navigate = useNavigate();
-  const downloadSchema = () => {
-    const id = fileReducer.selectedSchema._id;
-    dispatch(dowloadSchema({ id: id })).then((content) => {
+  const exportFile = () => {
+    const id = xmlReducer.selectedfile._id;
+    dispatch(downloadFile({ id: id })).then((content) => {
       content = content.payload;
-      const fileName = "schema.xsd";
+      const fileName = "file.xml";
       const blob = new Blob([content], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -264,7 +264,7 @@ const FilesScreen = (props) => {
               <FileTreeView></FileTreeView>
             </Box>
 
-            <Button variant="outlined" onClick={downloadSchema}>
+            <Button variant="outlined" onClick={exportFile}>
               <Typography
                 sx={{
                   fontSize: 15,

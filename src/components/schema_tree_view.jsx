@@ -41,6 +41,7 @@ import Colors from "../utulies/colors";
 import "../styles/style.css";
 import { nodeType } from "../utulies/data";
 import { ToastContainer, toast } from "react-toastify";
+import Loader from "./loader";
 
 import {
   postElement,
@@ -49,9 +50,12 @@ import {
   updateElement,
 } from "../features/schemas/slice";
 import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
 import SuccessAlert from "./sweet_alert/success";
 import FailAlert from "./sweet_alert/fail";
 import { useDispatch, useSelector } from "react-redux";
+import theme from "../styles/theme";
 function TransitionComponent(props) {
   const style = useSpring({
     from: {
@@ -72,24 +76,22 @@ function TransitionComponent(props) {
 }
 
 export default function SchemasTreeView() {
-  const [open, setOpen] = React.useState(true);
+  const MySwal = withReactContent(Swal);
+
   const [openIndexes, setOpenIndexes] = React.useState([0]);
   const [data, setData] = React.useState([]);
 
   const fileReducer = useSelector((state) => state.file);
 
   React.useEffect(() => {
-    console.log("sellected ");
     console.log(fileReducer.selectedSchema);
     setData(fileReducer.selectedSchema);
   }, [fileReducer.selectedSchema]);
 
   const ListItemComponent = ({ item, index }) => {
     const dispatch = useDispatch();
-    const fileReducer = useSelector((state) => state.file); // Get schemaList from the store
 
     const [openIndexes, setOpenIndexes] = React.useState([]);
-    const [open, setOpen] = React.useState(false);
     const [openStates, setOpenStates] = React.useState({});
 
     const [showAddForm, setShowAddForm] = React.useState(false); // State to show/hide the add form
@@ -105,7 +107,6 @@ export default function SchemasTreeView() {
     };
     const handleClick = () => {
       console.log(index);
-      // Removed index parameter, as it's not used here
       if (openIndexes.includes(index)) {
         setOpenIndexes(openIndexes.filter((i) => i !== index));
       } else {
@@ -125,9 +126,116 @@ export default function SchemasTreeView() {
         });
     };
 
+    const handleUpdateRootNode = () => {
+      MySwal.fire({
+        title: <Typography style={theme.swalTitle}>Update Xml Root</Typography>,
+        html: `
+      
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input id="name" value="${item.name}" class="swal2-input sweet-input" placeholder="Name" >
+      </div>
+  `,
+        showCancelButton: true,
+        confirmButtonText: "Update",
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+          const name = MySwal.getPopup().querySelector("#name").value;
+
+          return { name };
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Access the values returned from the preConfirm function
+          const { name } = result.value;
+
+          dispatch(
+            updateElement({
+              data: {
+                name: name,
+              },
+              id: item._id,
+            })
+          )
+            .then((response) => {
+              if (response && response.payload) {
+                if (response.payload.success) {
+                  dispatch(getFilesSchema());
+                  SuccessAlert({ message: response.payload.message });
+                } else {
+                  //   console.log(response.payload);
+                  FailAlert({ message: response.payload.message });
+                }
+              }
+            })
+            .catch((error) => {
+              FailAlert({ message: error });
+            });
+        }
+      });
+    };
+    const handleUpdateComplexNode = () => {
+      MySwal.fire({
+        title: <Typography style={theme.swalTitle}>Update Xml Node</Typography>,
+        html: `
+      
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input id="name" value="${item.name}" class="swal2-input sweet-input" placeholder="Name" >
+      </div>
+      <div class="form-group">
+        <label  for="levelH">LevelH:</label>
+        <input id="levelH" value="${item.lavelH}" class="swal2-input sweet-input" type="number" placeholder="LevelH" >
+      
+    </div>
+  `,
+        showCancelButton: true,
+        confirmButtonText: "Update",
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+          const name = MySwal.getPopup().querySelector("#name").value;
+          const lavelH = parseInt(
+            Swal.getPopup().querySelector("#levelH").value
+          );
+
+          return { name, lavelH };
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Access the values returned from the preConfirm function
+          const { name, lavelH } = result.value;
+
+          dispatch(
+            updateElement({
+              data: {
+                name: name,
+                lavelH: lavelH,
+              },
+              id: item._id,
+            })
+          )
+            .then((response) => {
+              if (response && response.payload) {
+                if (response.payload.success) {
+                  dispatch(getFilesSchema());
+                  SuccessAlert({ message: response.payload.message });
+                } else {
+                  //   console.log(response.payload);
+                  FailAlert({ message: response.payload.message });
+                }
+              }
+            })
+            .catch((error) => {
+              FailAlert({ message: error });
+            });
+        }
+      });
+    };
     const handleUpdateNode = () => {
       Swal.fire({
-        title: "Update Element",
+        title: <Typography style={theme.swalTitle}>Update Xml Node</Typography>,
         html: `
       
       <div class="form-group">
@@ -211,7 +319,6 @@ export default function SchemasTreeView() {
                   dispatch(getFilesSchema());
                   SuccessAlert({ message: response.payload.message });
                 } else {
-                  //   console.log(response.payload);
                   FailAlert({ message: response.payload.message });
                 }
               }
@@ -292,11 +399,10 @@ export default function SchemasTreeView() {
             height: "minHeight",
             display: "flex",
             gap: 2,
-            //  flex: 1,
+
             justifyContent: "space-around",
             alignItems: "center",
-            // padding: 3,
-            // border: "1px dashed #0024df",
+
             borderRadius: 4,
           }}
         >
@@ -307,7 +413,6 @@ export default function SchemasTreeView() {
               padding: 1,
               flex: "auto",
               display: "flex",
-              // backgroundColor: "red",
 
               justifyContent: "flex-start",
               flexDirection: "column",
@@ -381,8 +486,9 @@ export default function SchemasTreeView() {
             }}
           >
             {item.is_attribute ||
-            item.type === "string" ||
-            item.type === "number" ? (
+            (item.type !== "complex" &&
+              item.type !== "list" &&
+              item.type !== "root") ? (
               ""
             ) : (
               <AddIcon
@@ -391,13 +497,23 @@ export default function SchemasTreeView() {
               />
             )}
             <EditIcon
-              onClick={handleUpdateNode}
+              onClick={
+                item.type === "root"
+                  ? handleUpdateRootNode
+                  : item.type === "complex" || item.type === "list"
+                  ? handleUpdateComplexNode
+                  : handleUpdateNode
+              }
               sx={{ color: "green", fontSize: 40, paddingX: 1, marginY: 2 }}
             />
-            <DeleteForeverIcon
-              onClick={handleDeleteNode}
-              sx={{ color: "tomato", fontSize: 40, paddingX: 1, marginY: 2 }}
-            />
+            {item.type !== "root" ? (
+              <DeleteForeverIcon
+                onClick={handleDeleteNode}
+                sx={{ color: "tomato", fontSize: 40, paddingX: 1, marginY: 2 }}
+              />
+            ) : (
+              <></>
+            )}
           </Box>
         </Box>
         {showAddForm && (
@@ -532,7 +648,7 @@ export default function SchemasTreeView() {
   };
 
   return (
-    <Box sx={{ backgroundColor: "red" }}>
+    <Box>
       <List
         sx={{ bgcolor: "background.paper" }}
         component="nav"
@@ -548,7 +664,7 @@ export default function SchemasTreeView() {
         >
           <List component="div" disablePadding>
             {fileReducer.loading ? (
-              <>loading</>
+              <Loader></Loader>
             ) : (
               <>
                 {fileReducer?.selectedSchema?.data?.map((item, index) => (

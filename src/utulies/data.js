@@ -212,5 +212,14 @@ var dataStatic = [
     },
   },
 ];
-var nodeType = ["string", "number", "date", "complex", "list"];
+var nodeType = [
+  "text",
+  "number",
+  "boolean",
+  "url",
+  "date",
+  "dateTime",
+  "complex",
+  "list",
+];
 export { nodeType };

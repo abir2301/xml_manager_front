@@ -22,9 +22,22 @@ class SchemaDataService {
   downloadSchema() {
     return http.get(`/xsdFiles/schema.xsd`);
   }
+
+  exportFile(id) {
+    return http.post(`/file/xml/${id}`);
+  }
+  downloadFile() {
+    return http.get(`/xmlFiles/output.xml`);
+  }
   //xml_elements
   postElement(data, id) {
     return http.post(`/xml_element/${id}`, data);
+  }
+  postValue(data, id) {
+    return http.post(`/xml_element/value/${id}`, data);
+  }
+  getSubElement(id, data) {
+    return http.post(`/xml_element/sub/${id}`, data);
   }
   deleteElement(id) {
     return http.delete(`/xml_element/${id}`);

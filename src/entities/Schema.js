@@ -1,6 +1,6 @@
 export default class FileSchema {
   constructor(
-    _id = null,
+    _id = "0000",
     title = "no_title",
     version = 0,
     data = [

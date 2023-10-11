@@ -17,101 +17,234 @@ import {
   Paper,
   colors,
   ListItem,
+  Modal,
 } from "@mui/material";
+import {
+  postNodeValue,
+  getFiles,
+  getSubNode,
+} from "../features/xml_files/slice";
 import TreeItem, { treeItemClasses } from "@mui/lab/TreeItem";
 import Collapse from "@mui/material/Collapse";
 import { useSpring, animated } from "@react-spring/web";
-import { PlusOneOutlined } from "@mui/icons-material";
+import { AddAlarm, AddCircle, PlusOneOutlined } from "@mui/icons-material";
 import ListSubheader from "@mui/material/ListSubheader";
 import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import DraftsIcon from "@mui/icons-material/Drafts";
-import SendIcon from "@mui/icons-material/Send";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import StarBorder from "@mui/icons-material/StarBorder";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import FnInstance from "../utulies/functions";
-import Colors from "../utulies/colors";
-import "../styles/style.css";
-import { nodeType } from "../utulies/data";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import ListItemText from "@mui/material/ListItemText";
+import AddIcon from "@mui/icons-material/Add";
 import { ToastContainer, toast } from "react-toastify";
-
-import {
-  postElement,
-  getFilesSchema,
-  deleteElement,
-  updateElement,
-} from "../features/schemas/slice";
+import CheckIcon from "@mui/icons-material/Check";
 import Swal from "sweetalert2";
 import SuccessAlert from "./sweet_alert/success";
 import FailAlert from "./sweet_alert/fail";
 import { useDispatch, useSelector } from "react-redux";
-function TransitionComponent(props) {
-  const style = useSpring({
-    from: {
-      opacity: 0,
-      transform: "translate3d(20px,0,0)",
-    },
-    to: {
-      opacity: props.in ? 1 : 0,
-      transform: `translate3d(${props.in ? 0 : 20}px,0,0)`,
-    },
-  });
-
-  return (
-    <animated.div style={style}>
-      <Collapse {...props} />
-    </animated.div>
-  );
-}
+import theme from "../styles/theme";
 
 export default function FileTreeView() {
   const [data, setData] = React.useState([]);
-  const [isAttribute, setIsAttribute] = React.useState(false);
-  const [attribute, setAttribute] = React.useState({});
-  React.useEffect(() => {
-    // Your logic here for setting the attribute
-    // Example: setAttribute(yourValue);
-    // Ensure that you update the attribute based on some condition
-  }, [isAttribute, attribute]);
+  const [open, setOpen] = React.useState({});
+  const [value, setValue] = React.useState(""); // State to manage the new node name
+  const [valueError, setValueError] = React.useState("");
+  const dispatch = useDispatch();
   const fileReducer = useSelector((state) => state.file);
   const xmlReducer = useSelector((state) => state.xml);
+  React.useEffect(() => {}, [open, xmlReducer.selectedfile, xmlReducer.files]);
+  function testDataType(type, inputString) {
+    console.log(type);
+    const typePatterns = {
+      text: /.*/,
+      url: /.*/,
+      number: /^[-+]?\d+$/,
+      boolean: /^(true|false)$/i,
+      // float: /^[-+]?\d+\.\d+(?:[eE][-+]?\d+)?$/, // Handles scientific notation
+      // double: /^[-+]?\d+\.\d+(?:[eE][-+]?\d+)?$/, // Handles scientific notation
+      dateTime:
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+      date: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+    };
+
+    if (typePatterns[type].test(inputString)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // Example usage:
+
+  const handleOpen = (nodeId) => {
+    setOpen((open) => ({
+      ...open,
+      [nodeId]: true,
+    }));
+  };
+  const handleClose = (nodeId) => {
+    setOpen((prevOpen) => ({
+      ...prevOpen,
+      [nodeId]: false,
+    }));
+    console.log(open[nodeId]);
+  };
+  const handlePostValue = (node) => {
+    console.log(node);
+    console.log(testDataType(node.type, value));
+
+    setValueError("");
+    if (value.trim === "") {
+      setValueError("value is required ");
+      console.log(valueError);
+
+      if (testDataType(node.type, value))
+        console.log(testDataType(node.type, value));
+      return;
+    } else {
+      dispatch(
+        postNodeValue({
+          data: { value: value },
+          id: node._id,
+        })
+      );
+      // dispatch(getFiles());
+      setValue("");
+      setOpen(false);
+    }
+  };
+  const OpenForm = ({ node }) => {
+    return (
+      <Box
+        sx={{
+          flexDirection: "row",
+          marginY: 3,
+          marginX: 3,
+          display: "flex",
+          borderRadius: "8px",
+          rowGap: "20px",
+          columnGap: "20px",
+        }}
+      >
+        <Button
+          sx={{ backgroundColor: "#F5F9FF" }}
+          onClick={() => {}}
+          variant="contained"
+        >
+          <Typography sx={{ color: "black" }}>type: {node.type}</Typography>
+        </Button>
+        <TextField
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              height: "60px",
+              borderRadius: 2, // Adjust the border radius as needed
+              border: "2px #8E8E8E", // Add a thicker border and adjust the color
+              "& fieldset": {
+                borderColor: "#6c757d", // Border color when not focused
+              },
+              "&:hover fieldset": {
+                borderColor: "#6c757d", // Border color on hover
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#6c757d", // Border color when focused
+              },
+            },
+          }}
+          variant="outlined"
+          required
+          type={node.type ? node.type : "text"}
+          height={"20px"}
+          placeholder="input value "
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          error={Boolean(valueError)}
+          helperText={valueError}
+        />
+
+        <Button
+          sx={theme.formButtons}
+          onClick={() => handleClose(node._id)}
+          variant="contained"
+        >
+          <DeleteIcon sx={[{ color: "tomato" }, theme.formIcons]}></DeleteIcon>
+        </Button>
+        <Button
+          sx={theme.formButtons}
+          onClick={() => {
+            handlePostValue(node);
+          }}
+          variant="contained"
+        >
+          <CheckIcon sx={[theme.formIcons, { color: "green" }]}></CheckIcon>
+        </Button>
+      </Box>
+    );
+  };
   const renderNode = (node) => {
     if (node.childrens && node.childrens.length > 0) {
       return (
-        <List key={node._id}>
-          <ListItem style={{ paddingLeft: "0px" }}>
+        <List key={node._id} style={{ paddingLeft: "0px" }}>
+          <ListItem
+            sx={[theme.nodeStyle, { flexDirection: "row", display: "flex" }]}
+            onClick={() => {
+              handleOpen(node.attribute._id);
+            }}
+          >
             <ListItemText
               primary={
-                <Typography>
-                  {`<${node.name}`}
-                  {isAttribute ? ` ${attribute.name}="${attribute.value}"` : ""}
+                <Typography sx={theme.nodeNameStyle}>
+                  {`<${node.name}   `}
+                  {node.attribute._id
+                    ? ` ${node.attribute.name}=${node.attribute.value}`
+                    : ""}
                   {`>`}
                 </Typography>
               }
             />
+            {node.type === "list" ? (
+              <AddIcon
+                sx={{ fontSize: "35px", color: "green" }}
+                onClick={() => {
+                  console.log(xmlReducer.selectedfile);
+                  dispatch(
+                    getSubNode({
+                      id: node._id,
+                      data: {
+                        file: xmlReducer.selectedfile._id,
+                      },
+                    })
+                  ).then((response) => {
+                    dispatch(getFiles());
+                    //  renderNode(xmlReducer?.subNode?.childrens[0]);
+                  });
+                }}
+              ></AddIcon>
+            ) : (
+              <></>
+            )}
           </ListItem>
-          <ListItem style={{ paddingTop: "0", paddingBottom: "0" }}>
+          {open[node.attribute._id] && node.attribute._id && (
+            <OpenForm node={node.attribute}></OpenForm>
+          )}
+
+          <ListItem
+            style={{
+              paddingTop: "0",
+              marginLeft: "20px",
+              paddingBottom: "0",
+            }}
+          >
             <List>
               {node.childrens.map((child) => {
-                if (child.is_attribute) {
-                  console.log("ff");
-                }
                 return !child.is_attribute ? renderNode(child) : "";
               })}
             </List>
           </ListItem>
-          <ListItem style={{ paddingTop: "0", paddingBottom: "0" }}>
+          <ListItem sx={[theme.nodeStyle]}>
             <ListItemText
-              primary={<Typography>{`</${node.name}>`}</Typography>}
+              primary={
+                <Typography
+                  sx={theme.nodeNameStyle}
+                >{`</${node.name}>`}</Typography>
+              }
             />
           </ListItem>
         </List>
@@ -119,10 +252,15 @@ export default function FileTreeView() {
     } else {
       return (
         <List key={node._id}>
-          <ListItem style={{ paddingTop: "0", paddingBottom: "0" }}>
+          <ListItem
+            sx={[theme.nodeStyle]}
+            onClick={() => {
+              handleOpen(node._id);
+            }}
+          >
             <ListItemText
               primary={
-                <Typography>
+                <Typography sx={theme.nodeNameStyle}>
                   {`<${node.name}`}
                   {node.is_attribute ? ` ${node.name}="${node.value}"` : ""}
                   {`>${node.value || ""}</${node.name}>`}
@@ -130,6 +268,7 @@ export default function FileTreeView() {
               }
             />
           </ListItem>
+          {open[node._id] && <OpenForm node={node}></OpenForm>}
         </List>
       );
     }
@@ -147,13 +286,6 @@ export default function FileTreeView() {
         component="nav"
         aria-labelledby="nested-list-subheader"
       >
-        {/* <Paper elevation={3} style={{ padding: "20px" }}>
-          {xmlReducer.selectedfile.data.map((node) => (
-            <div key={node._id} style={{ marginLeft: "20px" }}>
-              {renderNode(node)}
-            </div>
-          ))}
-        </Paper> */}
         {xmlReducer.selectedfile.data.map((node) => (
           <div key={node._id} style={{ marginLeft: "20px" }}>
             {renderNode(node)}

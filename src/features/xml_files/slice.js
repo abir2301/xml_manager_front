@@ -61,6 +61,46 @@ export const deleteFile = createAsyncThunk("files/delete", async (id) => {
     });
   }
 });
+export const postNodeValue = createAsyncThunk(
+  "files/node_value",
+  async ({ data, id }) => {
+    const res = await SchemaDataService.postValue(data, id);
+    if (res.data.success) {
+      console.log("show toaster ");
+
+      return res.data;
+    } else {
+      toast.error(res.data.message, {
+        autoClose: 3000,
+        pauseOnHover: false,
+        style: {
+          background: "red", // Change the background color
+          color: "white", // Change the text color
+        },
+      });
+    }
+  }
+);
+export const getSubNode = createAsyncThunk(
+  "files/subNode",
+  async ({ data, id }) => {
+    const res = await SchemaDataService.getSubElement(id, data);
+    if (res.data.success) {
+      console.log("show toaster ");
+
+      return res.data;
+    } else {
+      toast.error(res.data.message, {
+        autoClose: 3000,
+        pauseOnHover: false,
+        style: {
+          background: "red", // Change the background color
+          color: "white", // Change the text color
+        },
+      });
+    }
+  }
+);
 export const postFile = createAsyncThunk(
   "files/post",
   async ({ data, id }, { rejectWithValue }) => {
@@ -135,13 +175,13 @@ export const setSelectedFile = createAsyncThunk(
     return schema;
   }
 );
-export const dowloadSchema = createAsyncThunk(
-  "xml_element/download",
+export const downloadFile = createAsyncThunk(
+  "file/download",
   async ({ id }) => {
     try {
-      const res = await SchemaDataService.exportSchema(id);
+      const res = await SchemaDataService.exportFile(id);
       if (res.data.success) {
-        const schema = await SchemaDataService.downloadSchema();
+        const schema = await SchemaDataService.downloadFile();
         return schema.data;
       }
     } catch (error) {}
@@ -195,42 +235,31 @@ export const xmlSlice = createSlice({
       state.loading = false;
       state.success = false;
     },
-    // [postElement.pending]: (state, action) => {
-    //   state.loading = true;
-    // },
-    // [postElement.fulfilled]: (state, action) => {
-    //   state.loading = false;
-    //   state.success = true;
-    //   state.selectedSchema = action.payload.data;
-    // },
-    // [postElement.rejected]: (state, action) => {
-    //   state.loading = false;
-    //   state.success = false;
-    // },
-    // [deleteElement.pending]: (state, action) => {
-    //   state.loading = true;
-    // },
-    // [deleteElement.fulfilled]: (state, action) => {
-    //   state.loading = false;
-    //   state.success = true;
-    //   state.selectedSchema = action.payload.data;
-    // },
-    // [deleteElement.rejected]: (state, action) => {
-    //   state.loading = false;
-    //   state.success = false;
-    // },
-    // [updateElement.pending]: (state, action) => {
-    //   state.loading = true;
-    // },
-    // [updateElement.fulfilled]: (state, action) => {
-    //   state.loading = false;
-    //   state.success = true;
-    //   state.selectedSchema = action.payload.data;
-    // },
-    // [updateElement.rejected]: (state, action) => {
-    //   state.loading = false;
-    //   state.success = false;
-    // },
+    [postNodeValue.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [postNodeValue.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.success = true;
+      state.selectedfile = action.payload.data;
+    },
+    [postNodeValue.rejected]: (state, action) => {
+      state.loading = false;
+      state.success = false;
+    },
+    [getSubNode.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getSubNode.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.success = true;
+      state.selectedfile = action.payload.data;
+    },
+    [getSubNode.rejected]: (state, action) => {
+      state.loading = false;
+      state.success = false;
+    },
+
     [setSelectedFile.pending]: (state, action) => {
       state.loading = true;
     },
@@ -255,18 +284,17 @@ export const xmlSlice = createSlice({
       state.loading = false;
       state.success = false;
     },
-    // [dowloadSchema.pending]: (state, action) => {
-    //   state.loading = true;
-    // },
-    // [dowloadSchema.fulfilled]: (state, action) => {
-    //   state.loading = false;
-    //   state.success = true;
-    //   // state.selectedSchema = action.payload.data;
-    // },
-    // [dowloadSchema.rejected]: (state, action) => {
-    //   state.loading = false;
-    //   state.success = false;
-    // },
+    [downloadFile.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [downloadFile.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.success = true;
+    },
+    [downloadFile.rejected]: (state, action) => {
+      state.loading = false;
+      state.success = false;
+    },
   },
 });
 export const { reducer } = xmlSlice;

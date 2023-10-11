@@ -7,9 +7,9 @@ import AuthScreen from "./screens/auth";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector, Provider } from "react-redux";
 import FilesScreen from "./screens/files";
+import { Box } from "@mui/material";
 function App(props) {
   const AppMain = () => {
-    const dispatch = useDispatch();
     const authReducer = useSelector((state) => state.auth);
     console.log(authReducer.isLogedIn);
     const token = localStorage.getItem("token");

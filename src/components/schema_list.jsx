@@ -1,10 +1,10 @@
 import React from "react";
-import { Typography, Box, Button } from "@mui/material";
+import { Typography, Box, Button, CircularProgress } from "@mui/material";
 import "../styles/style.css";
 import Colors from "../utulies/colors";
+import withReactContent from "sweetalert2-react-content";
+
 import { useState, useEffect, componentDidMount } from "react";
-import FolderIcon from "@mui/icons-material/Folder";
-import AddIcon from "@mui/icons-material/Add";
 
 import {
   getFilesSchema,
@@ -12,15 +12,17 @@ import {
   deleteSchema,
   postSchema,
 } from "../features/schemas/slice";
-import SuccessAlert from "./sweet_alert/success";
-import FailAlert from "./sweet_alert/fail";
+
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
-import { ToastContainer, toast } from "react-toastify";
+import Loader from "./loader";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import theme from "../styles/theme";
 
 const SchemaList = ({ onChange }) => {
   const fileReducer = useSelector((state) => state.file);
+  const MySwal = withReactContent(Swal);
 
   const dispatch = useDispatch();
 
@@ -41,7 +43,7 @@ const SchemaList = ({ onChange }) => {
       <ToastContainer />
 
       {fileReducer.loading ? (
-        <>loading</>
+        <Loader></Loader>
       ) : (
         <>
           {fileReducer?.fileSchemas?.length >= 0 ? (
@@ -49,55 +51,48 @@ const SchemaList = ({ onChange }) => {
               const handleClick = (event) => {
                 console.log(event.detail);
                 switch (event.detail) {
-                  case 1: {
-                    onChange(schema);
-                    break;
-                  }
                   case 2: {
-                    Swal.fire({
-                      title: "Manage Schema",
-                      customClass: {
-                        title: {
-                          color: Colors.purple,
-                        },
-                      },
+                    console.log("update");
+                    MySwal.fire({
+                      title: (
+                        <Typography style={theme.swalTitle}>
+                          Update Schema
+                        </Typography>
+                      ),
+
                       input: "text",
                       inputValue: schema.title,
-                      inputLabel: "Schema New Title",
-
-                      //                 html: `
-                      //   <input id="swal-input1" class="swal2-input" placeholder="New Schema Title" value="${schema.title}">
-                      // `,
+                      inputLabel: "New Schema Title",
                       showCancelButton: true,
                       confirmButtonText: "Update",
                       cancelButtonText: "Delete",
                       showCloseButton: true,
                       showLoaderOnConfirm: true,
                       preConfirm: (newTitle) => {
-                        console.log(newTitle);
-                        console.log(schema._id);
-
-                        // Handle the update logic here, e.g., call an API to update the schema title
-                        return dispatch(
-                          updateSchema({
-                            data: { title: newTitle },
-                            id: schema._id,
-                          })
-                        )
-                          .then((response) => {
-                            dispatch(getFilesSchema());
-                          })
-                          .catch((error) => {
-                            console.error("Error:", error);
-                            // Swal.showValidationMessage(
-                            //   `Request failed: ${error}`
-                            // );
-                            return false;
-                          });
+                        if (newTitle.length >= 1) {
+                          return dispatch(
+                            updateSchema({
+                              data: { title: newTitle },
+                              id: schema._id,
+                            })
+                          )
+                            .then((response) => {
+                              dispatch(getFilesSchema());
+                            })
+                            .catch((error) => {
+                              console.error("Error:", error);
+                              MySwal.showValidationMessage(
+                                `Request failed: ${error}`
+                              );
+                              return false;
+                            });
+                        } else {
+                          MySwal.showValidationMessage(`Empty Value `);
+                        }
                       },
-                      allowOutsideClick: () => !Swal.isLoading(),
+                      allowOutsideClick: () => !MySwal.isLoading(),
                     }).then((result) => {
-                      if (result.dismiss === Swal.DismissReason.cancel) {
+                      if (result.dismiss === MySwal.DismissReason.cancel) {
                         // Handle delete logic here, e.g., call an API to delete the schema
                         dispatch(deleteSchema(schema._id)).then(() => {
                           dispatch(getFilesSchema());
@@ -107,45 +102,23 @@ const SchemaList = ({ onChange }) => {
 
                     break;
                   }
+                  case 1: {
+                    onChange(schema);
+                  }
 
                   default: {
                     break;
                   }
                 }
               };
-              const handleDoubleClick = () => {
-                console.log("update");
-                // Rest of your double-click logic here
-              };
+
               return (
                 <Button
-                  className="schemaButton"
                   onClick={handleClick}
-                  //onDoubleClick={handleClick}
-                  // onClick={() => onChange(schema)}
-                  //  onDoubleClick={handleDoubleClick}
-                  // onDoubleClick={
-                  //   handleDoubleClick
-                  //   //   () => {
-                  //   //   console.log("update");
-
-                  // }
                   size="large"
                   key={schema._id}
                   variant="outlined"
-                  sx={{
-                    margin: 1,
-                    mb: 2,
-                    borderRadius: 2,
-                    paddingTop: 2,
-                    pb: 2,
-                    gap: 2,
-                    width: "100%", // Set the buttons' width to 100%
-                    textAlign: "left",
-                    borderColor: Colors.purple,
-                    backgroundColor: Colors.bg,
-                    // flexDirection: "column",
-                  }}
+                  sx={theme.schemaButton}
                 >
                   <Typography
                     sx={{
@@ -162,8 +135,16 @@ const SchemaList = ({ onChange }) => {
               );
             })
           ) : (
-            <div className="empty">
-              <h2>no data yet </h2>
+            <div>
+              <Typography
+                sx={{
+                  fontSize: 16,
+                  color: "#1E1E1E",
+                  fontWeight: "normal",
+                }}
+              >
+                Empty Schema List
+              </Typography>
             </div>
           )}
         </>
@@ -180,8 +161,12 @@ const SchemaList = ({ onChange }) => {
       >
         <Button
           onClick={() => {
-            Swal.fire({
-              title: "Manage Schema",
+            MySwal.fire({
+              title: (
+                <Typography style={theme.swalTitle}>
+                  Create New Schema
+                </Typography>
+              ),
               customClass: {
                 title: {
                   color: Colors.purple,
@@ -189,31 +174,32 @@ const SchemaList = ({ onChange }) => {
               },
               input: "text",
 
-              inputLabel: " New Schema  Title",
+              inputLabel: "schema title",
 
-              //                 html: `
-              //   <input id="swal-input1" class="swal2-input" placeholder="New Schema Title" value="${schema.title}">
-              // `,
               showCancelButton: true,
               confirmButtonText: "Create",
               cancelButtonText: "Cancel",
               showCloseButton: true,
               showLoaderOnConfirm: true,
               preConfirm: (newTitle) => {
-                return dispatch(
-                  postSchema({
-                    data: { title: newTitle },
-                  })
-                )
-                  .then((response) => {
-                    dispatch(getFilesSchema());
-                    console.log(response.payload);
-                  })
-                  .catch((error) => {
-                    console.error("Error:", error);
-                    Swal.showValidationMessage(`Request failed: ${error}`);
-                    return false;
-                  });
+                if (newTitle.length >= 1) {
+                  return dispatch(
+                    postSchema({
+                      data: { title: newTitle },
+                    })
+                  )
+                    .then((response) => {
+                      dispatch(getFilesSchema());
+                      console.log(response.payload);
+                    })
+                    .catch((error) => {
+                      console.error("Error:", error);
+                      MySwal.showValidationMessage(`Request failed: ${error}`);
+                      return false;
+                    });
+                } else {
+                  MySwal.showValidationMessage(`Empty Value`);
+                }
               },
             });
           }}
@@ -235,11 +221,10 @@ const SchemaList = ({ onChange }) => {
             sx={{
               fontSize: 16,
               color: "#1E1E1E",
-
               fontWeight: "normal",
             }}
           >
-            {"New Schema"}
+            {"create Schema"}
           </Typography>
         </Button>
       </Box>
